@@ -3,7 +3,7 @@ import renderapi
 from test_data import (
         render_params,
         rough_parameters)
-from EMaligner import EMaligner
+from bigfeta import bigfeta
 import json
 import os
 import copy
@@ -81,7 +81,7 @@ def test_petsc_solver(
                 "translation_factor": 1.0e-10
                 }
 
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=parameters, args=[])
     mod.run()
     indexfile = os.path.join(
@@ -97,7 +97,7 @@ def test_petsc_solver(
     cmd = [
             'singularity',
             'run',
-            './EMaligner/distributed/bin/petsc_solver.simf']
+            './bigfeta/distributed/bin/petsc_solver.simf']
     cmd += ['-input', indexfile]
     cmd += ['-output', outfile]
     # this is a direct PaStiX solve
@@ -109,7 +109,7 @@ def test_petsc_solver(
     parameters['ingest_from_file'] = outfile
     parameters['output_mode'] = 'stack'
     parameters['output_stack']['name'] = 'from_petsc'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=parameters, args=[])
     mod.run()
 
@@ -121,7 +121,7 @@ def test_petsc_solver(
     parameters['ingest_from_file'] = ''
     parameters['output_mode'] = 'stack'
     parameters['output_stack']['name'] = 'from_scipy'
-    smod = EMaligner.EMaligner(
+    smod = bigfeta.BigFeta(
             input_data=parameters, args=[])
     smod.run()
 
@@ -180,7 +180,7 @@ def test_hdf5_mode_similarity(
     parameters['hdf5_options']['chunks_per_file'] = chunks
 
     # check output mode HDF5
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(parameters), args=[])
     mod.run()
     indexfile = os.path.join(
@@ -192,7 +192,7 @@ def test_hdf5_mode_similarity(
     # check assemble from file
     parameters['output_mode'] = 'none'
     parameters['assemble_from_file'] = indexfile
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(parameters), args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-7)
@@ -206,7 +206,7 @@ def test_hdf5_mode_similarity(
 
     parameters['ingest_from_file'] = indexfile
     parameters['output_mode'] = 'stack'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(parameters), args=[])
     mod.run()
     tin = renderapi.tilespec.get_tile_specs_from_stack(

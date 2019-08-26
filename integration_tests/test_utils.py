@@ -1,5 +1,5 @@
 import pytest
-from EMaligner.utils import (
+from bigfeta.utils import (
         blocks_from_tilespec_pair, ready_transforms)
 import numpy as np
 import os

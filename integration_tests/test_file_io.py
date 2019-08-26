@@ -3,8 +3,8 @@ import renderapi
 from test_data import (render_params,
                        montage_raw_tilespecs_json,
                        montage_parameters)
-from EMaligner import EMaligner
-from EMaligner import jsongz
+from bigfeta import bigfeta
+from bigfeta import jsongz
 import json
 from marshmallow.exceptions import ValidationError
 import copy
@@ -56,7 +56,7 @@ def solved_montage(render, raw_stack, montage_pointmatches):
     p['input_stack']['name'] = raw_stack
     p['output_stack']['name'] = 'solver_output_stack'
     p['pointmatch']['name'] = montage_pointmatches
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     yield mod
     renderapi.stack.delete_stack('output_stack_name', render=render)
@@ -69,7 +69,7 @@ def test_validation(raw_stack, montage_pointmatches):
     p['output_mode'] = 'none'
     p['pointmatch']['name'] = montage_pointmatches
     with pytest.raises(ValidationError):
-        tmod = EMaligner.EMaligner(input_data=p, args=[])
+        tmod = bigfeta.BigFeta(input_data=p, args=[])
         del tmod
 
     p['input_stack']['db_interface'] = 'mongo'
@@ -77,7 +77,7 @@ def test_validation(raw_stack, montage_pointmatches):
     p['output_stack']['db_interface'] = 'file'
     p['output_stack']['output_file'] = None
     with pytest.raises(ValidationError):
-        tmod = EMaligner.EMaligner(input_data=p, args=[])
+        tmod = bigfeta.BigFeta(input_data=p, args=[])
         del tmod
 
 
@@ -103,7 +103,7 @@ def test_input_stack_file(
     p['output_mode'] = 'none'
     p['pointmatch']['name'] = montage_pointmatches
 
-    tmod = EMaligner.EMaligner(input_data=p, args=[])
+    tmod = bigfeta.BigFeta(input_data=p, args=[])
     tmod.run()
 
     for k in ['precision', 'error', 'err']:
@@ -158,7 +158,7 @@ def test_match_file(
     p['pointmatch']['input_file'] = match_file
     p['output_mode'] = 'none'
 
-    tmod = EMaligner.EMaligner(input_data=p, args=[])
+    tmod = bigfeta.BigFeta(input_data=p, args=[])
     tmod.run()
 
     for k in ['precision', 'error', 'err']:
@@ -200,7 +200,7 @@ def test_output_file(
             "resolvedtiles.json")
     p['output_stack']['compress_output'] = compress
 
-    tmod = EMaligner.EMaligner(input_data=p, args=[])
+    tmod = bigfeta.BigFeta(input_data=p, args=[])
     tmod.run()
 
     solved = renderapi.resolvedtiles.ResolvedTiles(

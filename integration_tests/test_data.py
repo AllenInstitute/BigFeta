@@ -27,7 +27,7 @@ client_script_location = os.environ.get(
         'RENDER_CLIENT_SCRIPTS',
         '/var/www/render/render-ws-java-client/src/main/scripts/')
 project = 'test_project'
-outdir = os.environ.get('EM_ALIGNER_OUTPUT_DIR', '/home/danielk/tmp/tmp')
+outdir = os.environ.get('BIGFETA_OUTPUT_DIR', '/home/danielk/tmp/tmp')
 
 render_params = {
     'host': render_host,

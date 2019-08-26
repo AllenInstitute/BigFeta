@@ -1,6 +1,6 @@
 import pytest
 import os
-from EMaligner import jsongz
+from bigfeta import jsongz
 import shutil
 import json
 import itertools

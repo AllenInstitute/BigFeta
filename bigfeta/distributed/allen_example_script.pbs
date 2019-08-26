@@ -1,0 +1,31 @@
+#/bin/bash
+  
+#PBS -N bigfeta_dist_solve
+#PBS -q emconnectome
+#PBS -l nodes=2:ppn=1
+#PBS -l walltime=0:02:00
+#PBS -n
+#PBS -j oe
+#PBS -o /allen/programs/celltypes/workgroups/em-connectomics/danielk/BigFeta/bigfeta/distributed
+#PBS -m a
+#PBS -M danielk@alleninstitute.org
+
+module load mpi/mpich-x86_64
+
+simf=/allen/programs/celltypes/workgroups/em-connectomics/danielk/BigFeta/bigfeta/distributed/bin/petsc_solver.simf
+input=/allen/programs/celltypes/workgroups/em-connectomics/danielk/BigFeta/solution_input.h5
+output=/allen/programs/celltypes/workgroups/em-connectomics/danielk/BigFeta/tmp.h5
+
+rm -f tmphosts2
+touch tmphosts2
+cat $PBS_NODEFILE > tmphosts
+np_total=0
+for out in $(cat tmphosts)
+do
+np=$(pbsnodes $out | grep np | tr -dc '0-9')
+np=$((np / 2))
+np_total=$((np_total+np))
+echo $out:$np >> tmphosts2
+done
+
+mpiexec -n $np_total -f tmphosts2 singularity run --bind /allen:/allen $simf -input $input -output $output -ksp_type preonly -pc_type lu -log_view

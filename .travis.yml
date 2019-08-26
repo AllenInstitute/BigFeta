@@ -34,7 +34,7 @@ before_install:
   - /bin/bash .travis/singularity_setup.sh
 env:
   global:
-    - EM_ALIGNER_OUTPUT_DIR=/tmp/solver_output
+    - BIGFETA_OUTPUT_DIR=/tmp/solver_output
     - RENDER_HOST=localhost
     - RENDER_PORT=8080
     - secure: gIvBfWzWZizVxIW3eJfMX4V4/wrtn6zVoI9lkDbnXgn42+jIUdZYLEnHdZDtgOYtwUHUiY0UuXX/D9pl5XK+5IrZ+ocRKv8vIL1APJNxJGWJThkk8ifQFn+fuG2MvlA1b3z3903FNMSw3AcG0479YucZkPx7TmexU5DHM/zf/+/KvCV5qDPKjZu4hL3o/njuwNZGpYmT0+pUvugiAhF1c5YBmPBMhaplUYKdjuGMeLOlB/QxmBdkTPWCeVda8ohB3ngGc2yjhtDPAaOo9LKNrdLje6DCr2Zv6e4qo27YNFpXoICN0qUPOaoGOoVJ/HOq8HUZgJMi9KiYH2oqP27RqPOHaGABK7PF5aMg6vvUBcCYP4n93rnbm7g4k/+A/mUeew9lXyrh8+O9d8ul5eNfLdaQ1HGnR093Vx53Sr7Q9lyNU/PUteMGzRYQw2EQGuryGiAKJ5tWD9HIHtqQ7iNZup8ijHCKVdmtLHROTHMvpcagQ33Sl/+U05E50YoDZRzvTNSaWUoNhl01xRIyp35KYy55Ei2X8eMTJlirdzKj1hAeOED98SmKx8ROypxJDzcO/N8AGlPRc9/l+OplKTvpnlD3Nsd/bxErWEmrBDtAkY05rfR48e9xtDyqV4KuAXy0wBJn5eqFEFpNNxzMi78CHsF023UodVsWAzn4HvAojrQ=
@@ -42,7 +42,7 @@ env:
     - secure: JGbQl7niiYNxLttqfOj8m0rOXHXbK9NVHheu8OqJlr5bdn+8HngZFaMQW9sJtq0aeVHjOTOPhf6bpQvb6Uy8fLMqZU1cQnLAxpENvm5apqtjs5xrhN0aaFJd7dFMv8ViLUU6xf8LYkvZyzP9nL2WSIZ99gk7upDR/p29Jq+tz4R522L5liknpNwrRSQvG/1jQeDLIQ6LXWSfpxScPRZFT0AWvbUmcNU6TKPXASnVpKRvgm/sisQH99iHgEqYn75xT7Ozisl0UMwJ6Pl9h6x/PwmlE+vlvIRyg2UpXn38gAvWHjL59jCVd/fpTe7cm4fKp26ochi7wIJnVdUloCPy8cyN8yoTkuDddvd5eEPCf9Wr4gNnTu7E/sylryafnWnKfLi3gXKdPG//8kZTzBHPzDH5dzxyiOY2Zn9y2e4fTfq5y2Q+pCwfmEDY+q6wymMCuvPAND7ykdz7PhPx0O8X4fU7zn+G3ePI1aOCs2mMC1omYy5YGRuK7waRauXqZmreQZ1f3rMJ6gF1xIOYfniDVFQ4UjvpgBb86GMGSjeXxcOSO/jNYcBOepoxVni1AuPX5L/4K1PgTRNjGM726sGshZHUTEc1uqqO5kyTp5w2nbFOeNXwtYD/VhCOKDRm6EF1MGmdVT7dERsZldN9WKcJetDwo+Vq1mFcsItoIWiy6cs=
     - secure: BHefw1uJ0pVGIiPf9Jb1sMT8f5Dq4QmHjmyfa326QnLceYKci6XxWUYXTu2V8R4hEGmlW6b9cl074+fFlI9HjFJZnb8+P5M54IeRbgP8Y6e0w1gaFR75NNS+FU0ZmLCKN6zCZIkjQdjRE+4XtXwya6F4u/pilNgtyOgoIY+L/I2+0ZjOxcJ/yKFsPyTxg28H66P6b7BjwzrpoYabTUapJFd7KLMbCCpstw5/3aLhkvYMrmEM2h6Lcde0+Ne5UPZ2BFFP0Zcf31sV2i3jpnzbpCs7A9jl+s+UOBIWwjaV3lEuGM5cgfIII/3nhdYeGJ6KyXXXIiTcOlns+suTw5II04DyXtG7ltJ3Jue3AtYa2Drj9oM111WqoolDyuQfxX66IDKe2mb96iyQBf78cCjm3zVyipSGDntpBEq44Ss/f7d/Hl7m/Ls5Soh50DWDr8TXkYSMib/5xbAF+N28PUs0BYR+dgIqFDgZ8bLOPcw1E10L4LZwZ+E0kp8JKX2sWZe7XveFgNv4d2fJpqkp/1zis69z6pKMZrQWur6+ZahxOWHpUdOWndK2cPXe8PvUyRhHlUayb15FIAjRRStdSZt7t+9yRnNJisPZKpRUwMZrKZDUK/8Pvn76Z8FmEd18c7kBOSSTaR0iGa25ganP+Fqvzh986qEm8nC8ZcpaQqpE8NE=
 script:
-  - sudo singularity build EMaligner/distributed/bin/petsc_solver.simf EMaligner/distributed/src/Singularity.petsc_solver
+  - sudo singularity build bigfeta/distributed/bin/petsc_solver.simf bigfeta/distributed/src/Singularity.petsc_solver
   - python setup.py test
 cache:
   pip: true
@@ -50,6 +50,6 @@ cache:
     - "$HOME/.m2"
 after_success:
   - codecov -t 31f0f992-618d-4d7d-9da2-69f45c32455e
-  - "BRANCHES_TO_MERGE_REGEX='develop' BRANCH_TO_MERGE_INTO=master GITHUB_REPO=AllenInstitute/EM_aligner_python .travis/merge_script.sh"
+  - "BRANCHES_TO_MERGE_REGEX='develop' BRANCH_TO_MERGE_INTO=master GITHUB_REPO=AllenInstitute/bigfeta .travis/merge_script.sh"
 after_failure:
   docker logs --tail 20 $(docker-compose ps -q renderservice)

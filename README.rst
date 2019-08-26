@@ -1,17 +1,17 @@
-.. image:: https://travis-ci.org/AllenInstitute/EM_aligner_python.svg?branch=master
-   :target: https://travis-ci.org/AllenInstitute/EM_aligner_python
+.. image:: https://travis-ci.org/AllenInstitute/bigfeta.svg?branch=master
+   :target: https://travis-ci.org/AllenInstitute/bigfeta
    :alt: Build Status
-.. image:: https://codecov.io/gh/AllenInstitute/EM_aligner_python/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/AllenInstitute/EM_aligner_python
-.. image:: https://readthedocs.org/projects/em-aligner-python/badge/?version=latest
-  :target: https://em-aligner-python.readthedocs.io/en/latest/?badge=latest
+.. image:: https://codecov.io/gh/AllenInstitute/bigfeta/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/AllenInstitute/bigfeta
+.. image:: https://readthedocs.org/projects/bigfeta/badge/?version=latest
+  :target: https://bigfeta.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
   
 
-EM_aligner_python
+bigfeta
 #################
 
-Alignment of EM datasets. Builds sparse matrices from tilespecs and pointmatch collections and solves for new transforms using constrained linear least squares.
+Alignment of features. Builds sparse matrices from tilespecs and pointmatch collections and solves for new transforms using constrained linear least squares.
 
 Level of support
 ################
@@ -19,7 +19,7 @@ We are planning on occasional updating this tool with no fixed schedule. Communi
 
 Documentation
 #############
-https://em-aligner-python.readthedocs.io/en/latest/index.html
+https://bigfeta.readthedocs.io/en/latest/index.html
 
 Acknowledgement of Government Sponsorship
 #########################################

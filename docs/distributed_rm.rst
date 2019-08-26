@@ -1,1 +1,1 @@
-.. mdinclude:: ../EMaligner/distributed/README.md
+.. mdinclude:: ../bigfeta/distributed/README.md

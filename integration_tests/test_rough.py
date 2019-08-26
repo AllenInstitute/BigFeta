@@ -3,7 +3,7 @@ import renderapi
 from test_data import (
         render_params,
         rough_parameters)
-from EMaligner import EMaligner, utils
+from bigfeta import bigfeta, utils
 from marshmallow import ValidationError
 import json
 import os
@@ -173,7 +173,7 @@ def test_rough_similarity_explicit_depth(
     rough_parameters2['matrix_assembly']['depth'] = [0, 1, 2]
     rough_parameters2['matrix_assembly']['explicit_weight_by_depth'] = \
         [0, 0.5, 0.33]
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     tin = renderapi.tilespec.get_tile_specs_from_stack(
@@ -188,7 +188,7 @@ def test_rough_similarity_explicit_depth(
     with pytest.raises(ValidationError):
         rough_parameters2['matrix_assembly']['depth'] = [0, 1]
         # not the same length as weights
-        EMaligner.EMaligner(
+        bigfeta.BigFeta(
                 input_data=copy.deepcopy(rough_parameters2), args=[])
 
 
@@ -206,7 +206,7 @@ def test_multi_stack_name_exception(
         rough_parameters2['input_stack']['name'] = [
                 rough_parameters2['input_stack']['name']] * 2
         # stacks should only have 1 name (so far)
-        EMaligner.EMaligner(
+        bigfeta.BigFeta(
                 input_data=copy.deepcopy(rough_parameters2), args=[])
 
 
@@ -220,9 +220,9 @@ def test_multi_profile_exception(
     rough_parameters2['output_stack']['name'] = output_stack_name
     rough_parameters2['pointmatch']['name'] = rough_pointmatches
     rough_parameters2['transformation'] = 'SimilarityModel'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
-    with pytest.raises(utils.EMalignerException):
+    with pytest.raises(utils.BigFetaException):
         mod.args['profile_data_load'] = True
         mod.run()
     del mod
@@ -238,7 +238,7 @@ def test_rough_similarity_2(
     rough_parameters2['output_stack']['name'] = output_stack_name
     rough_parameters2['pointmatch']['name'] = rough_pointmatches
     rough_parameters2['transformation'] = 'SimilarityModel'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     tin = renderapi.tilespec.get_tile_specs_from_stack(
@@ -262,7 +262,7 @@ def test_rough_rotation(
     rough_parameters2['output_stack']['name'] = output_stack_name
     rough_parameters2['pointmatch']['name'] = rough_pointmatches
     rough_parameters2['transformation'] = 'RotationModel'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     tin = renderapi.tilespec.get_tile_specs_from_stack(
@@ -286,7 +286,7 @@ def test_apply_list(
     rough_parameters2['pointmatch']['name'] = rough_pointmatches
     rough_parameters2['transformation'] = 'RotationModel'
     rough_parameters2['transform_apply'] = [0, 1]
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     tin = renderapi.tilespec.get_tile_specs_from_stack(
@@ -298,7 +298,7 @@ def test_apply_list(
 
     rough_parameters2['transform_apply'] = [4]
     with pytest.raises(IndexError):
-        mod = EMaligner.EMaligner(
+        mod = bigfeta.BigFeta(
                 input_data=copy.deepcopy(rough_parameters2), args=[])
         mod.run()
     del mod
@@ -317,7 +317,7 @@ def test_rough_similarity_split(
     rough_parameters2['pointmatch']['name'] = split_rough_pointmatches
     rough_parameters2['pointmatch']['db_interface'] = pm_db_intfc
     rough_parameters2['transformation'] = 'SimilarityModel'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     tin = renderapi.tilespec.get_tile_specs_from_stack(
@@ -344,7 +344,7 @@ def test_missing_section(
     rough_parameters2['transformation'] = 'SimilarityModel'
     rough_parameters2['input_stack']['db_interface'] = pm_db_intfc
 
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     tin = renderapi.tilespec.get_tile_specs_from_stack(
@@ -369,7 +369,7 @@ def test_missing_match(
     rough_parameters2['pointmatch']['name'] = rough_pointmatches_missing
     rough_parameters2['transformation'] = 'SimilarityModel'
 
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     tin = renderapi.tilespec.get_tile_specs_from_stack(
@@ -392,7 +392,7 @@ def test_affine_on_similarity(
     rough_parameters2['output_stack']['name'] = 'sim_out'
     rough_parameters2['pointmatch']['name'] = rough_pointmatches
     rough_parameters2['transformation'] = 'SimilarityModel'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     del mod
@@ -400,7 +400,7 @@ def test_affine_on_similarity(
     rough_parameters2['input_stack']['name'] = 'sim_out'
     rough_parameters2['output_stack']['name'] = output_stack_name
     rough_parameters2['transformation'] = 'AffineModel'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
 
@@ -421,7 +421,7 @@ def test_output_mode_none(
     rough_parameters2['pointmatch']['name'] = rough_pointmatches
     rough_parameters2['transformation'] = 'AffineModel'
     rough_parameters2['output_mode'] = 'none'
-    mod = EMaligner.EMaligner(
+    mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-7)

@@ -3,7 +3,7 @@ import renderapi
 from test_data import (render_params,
                        montage_raw_tilespecs_json,
                        montage_parameters)
-from EMaligner import EMaligner
+from bigfeta import bigfeta
 import json
 from marshmallow.exceptions import ValidationError
 import copy
@@ -118,7 +118,7 @@ def test_weighted(
     p['input_stack']['name'] = loading_raw_stack
     p['output_stack']['name'] = output_stack_name
     p['pointmatch']['name'] = montage_pointmatches_weighted
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-7)
     assert np.all(np.array(mod.results['error']) < 200)
@@ -135,7 +135,7 @@ def test_multi_pm(
     p['input_stack']['name'] = loading_raw_stack
     p['output_stack']['name'] = output_stack_name
     p['pointmatch']['name'] = split_montage_pointmatches
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-7)
     assert np.all(np.array(mod.results['error']) < 200)
@@ -159,7 +159,7 @@ def test_different_transforms(
     p['transformation'] = transform
     p['fullsize'] = fullsize
     p['poly_order'] = order
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-7)
     assert np.all(np.array(mod.results['error']) < 200)
@@ -179,7 +179,7 @@ def test_polynomial(
             'default_lambda': 1000.0,
             'translation_factor': 1e-5,
             'poly_factors': [1e-5, 1000.0, 1e6]}
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-4)
     assert np.all(np.array(mod.results['error']) < 200)
@@ -198,7 +198,7 @@ def test_thinplate(
             'default_lambda': 1000.0,
             'translation_factor': 1e-5,
             'thinplate_factor': 1e-5}
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-4)
     assert np.all(np.array(mod.results['error']) < 200)
@@ -216,7 +216,7 @@ def test_poly_validation(output_stack_name):
     p['poly_order'] = 2
     with pytest.raises(ValidationError):
         # because poly_factors should be length 3
-        EMaligner.EMaligner(input_data=p, args=[])
+        bigfeta.BigFeta(input_data=p, args=[])
 
 
 @pytest.mark.parametrize("stack_state", ["COMPLETE", "LOADING"])
@@ -229,7 +229,7 @@ def test_stack_state(
     p['input_stack']['name'] = loading_raw_stack
     p['output_stack']['name'] = output_stack_name
     p['pointmatch']['name'] = montage_pointmatches
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-7)
     assert np.all(np.array(mod.results['error']) < 200)
@@ -249,7 +249,7 @@ def test_basic(
     p['input_stack']['db_interface'] = db_intfc
     p['output_stack']['db_interface'] = 'render'
     p['pointmatch']['db_interface'] = db_intfc
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-7)
     assert np.all(np.array(mod.results['error']) < 200)
@@ -265,7 +265,7 @@ def test_render_output(
     p['output_stack']['name'] = output_stack_name
     p['pointmatch']['name'] = montage_pointmatches
     p['render_output'] = render_output
-    mod = EMaligner.EMaligner(input_data=p, args=[])
+    mod = bigfeta.BigFeta(input_data=p, args=[])
     mod.run()
     assert np.all(np.array(mod.results['precision']) < 1e-7)
     assert np.all(np.array(mod.results['error']) < 200)

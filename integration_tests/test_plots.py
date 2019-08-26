@@ -3,9 +3,9 @@ import renderapi
 from test_data import (render_params,
                        montage_raw_tilespecs_json,
                        montage_parameters)
-from EMaligner.qctools.CheckPointMatches import CheckPointMatches
-from EMaligner.qctools.CheckResiduals import CheckResiduals
-from EMaligner.qctools.CheckTransforms import CheckTransforms, fixpi
+from bigfeta.qctools.CheckPointMatches import CheckPointMatches
+from bigfeta.qctools.CheckResiduals import CheckResiduals
+from bigfeta.qctools.CheckTransforms import CheckTransforms, fixpi
 import json
 import os
 import matplotlib.pyplot as plt

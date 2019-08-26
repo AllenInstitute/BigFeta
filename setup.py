@@ -15,7 +15,7 @@ class PyTest(TestCommand):
         # import here, cause outside the eggs aren't loaded
         import shlex
         import pytest
-        self.pytest_args += " --cov=EMaligner --cov-report html "\
+        self.pytest_args += " --cov=bigfeta --cov-report html "\
                             "--junitxml=test-reports/test.xml"
 
         errno = pytest.main(shlex.split(self.pytest_args))
@@ -28,14 +28,14 @@ with open('test_requirements.txt', 'r') as f:
 with open('requirements.txt', 'r') as f:
     required = f.read().splitlines()
 
-setup(name='EMaligner',
+setup(name='bigfeta',
       use_scm_version=True,
       description='a python package to solve for transformations of image tiles, given point matches' 
                   'between those tiles and their transformations stored in a render database '
                   'databases see https://github.com/saalfeldlab/render and https://github.com/khaledkhairy/EM_aligner',
       author='Daniel Kapner',
       author_email='danielk@alleninstitute.org',
-      url='https://github.com/AllenInstitute/EM_Aligner_python',
+      url='https://github.com/AllenInstitute/bigfeta',
       packages=find_packages(),
       setup_requires=['setuptools_scm'],
       install_requires=required,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# EMaligner documentation build configuration file, created by
+# bigfeta documentation build configuration file, created by
 # sphinx-quickstart on Mon May 20 10:03:21 2019.
 #
 # This file is execfile()d with the current directory set to its
@@ -54,23 +54,23 @@ intersphinx_mapping = {
 
 # Setup the breathe extension
 breathe_projects = {
-    "ema_distributed": "./doxyoutput/xml"
+    "bigfeta_distributed": "./doxyoutput/xml"
 }
-breathe_default_project = "ema_distributed"
+breathe_default_project = "bigfeta_distributed"
 
 # Setup the exhale extension
 exhale_args = {
     # These arguments are required
     "containmentFolder":     "./distributed",
     "rootFileName":          "distributed.rst",
-    "rootFileTitle":         "EM aligner distributed",
+    "rootFileTitle":         "BigFeta distributed",
     "doxygenStripFromPath":  "..",
     # Suggested optional arguments
     "createTreeView":        True,
     # TIP: if using the sphinx-bootstrap-theme, you need
     # "treeViewIsBootstrap": True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    "INPUT = ../EMaligner/distributed/src"
+    "exhaleDoxygenStdin":    "INPUT = ../bigfeta/distributed/src"
 }
 
 # Tell sphinx what the primary language being documented is.
@@ -92,7 +92,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'EMaligner'
+project = u'bigfeta'
 copyright = u'2019, Dan Kapner'
 author = u'Dan Kapner'
 
@@ -153,7 +153,7 @@ html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'EMalignerdoc'
+htmlhelp_basename = 'bigfetadoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -180,7 +180,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'EMaligner.tex', u'EMaligner Documentation',
+    (master_doc, 'bigfeta.tex', u'BigFeta Documentation',
      u'Dan Kapner', 'manual'),
 ]
 
@@ -190,7 +190,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'emaligner', u'EMaligner Documentation',
+    (master_doc, 'bigfeta', u'BigFeta Documentation',
      [author], 1)
 ]
 
@@ -201,15 +201,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'EMaligner', u'EMaligner Documentation',
-     author, 'EMaligner', 'One line description of project.',
+    (master_doc, 'bigfeta', u'BigFeta Documentation',
+     author, 'bigfeta', 'One line description of project.',
      'Miscellaneous'),
 ]
 
 
 sys.path.insert(0, os.path.abspath("../"))
-sys.path.insert(0, os.path.abspath("../EMaligner/schemas.py"))
-sys.path.insert(0, os.path.abspath("../EMaligner/jsongz.py"))
+sys.path.insert(0, os.path.abspath("../bigfeta/schemas.py"))
+sys.path.insert(0, os.path.abspath("../bigfeta/jsongz.py"))
 
 def setup(app):
     app.connect('autodoc-process-docstring',process_schemas)

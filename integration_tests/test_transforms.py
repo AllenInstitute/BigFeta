@@ -1,14 +1,14 @@
 import pytest
 import renderapi
-from EMaligner.transform.transform import AlignerTransform
-from EMaligner.transform.affine_model import AlignerAffineModel
-from EMaligner.transform.similarity_model import AlignerSimilarityModel
-from EMaligner.transform.rotation_model import AlignerRotationModel
-from EMaligner.transform.translation_model import AlignerTranslationModel
-from EMaligner.transform.polynomial_model import AlignerPolynomial2DTransform
-from EMaligner.transform.thinplatespline_model import \
+from bigfeta.transform.transform import AlignerTransform
+from bigfeta.transform.affine_model import AlignerAffineModel
+from bigfeta.transform.similarity_model import AlignerSimilarityModel
+from bigfeta.transform.rotation_model import AlignerRotationModel
+from bigfeta.transform.translation_model import AlignerTranslationModel
+from bigfeta.transform.polynomial_model import AlignerPolynomial2DTransform
+from bigfeta.transform.thinplatespline_model import \
         AlignerThinPlateSplineTransform
-from EMaligner.transform.utils import AlignerTransformException, aff_matrix
+from bigfeta.transform.utils import AlignerTransformException, aff_matrix
 import numpy as np
 
 
