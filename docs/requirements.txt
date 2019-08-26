@@ -1,9 +1,0 @@
-sphinxcontrib-bibtex
-exhale
-render-python==2.2.1
-marshmallow<3.0
-argschema<2.0
-m2r
-pymongo
-pathos
-h5py
