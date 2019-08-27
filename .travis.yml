@@ -1,55 +1,52 @@
 language: python
 dist: xenial
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-  - "3.6-dev"
-  - "3.7-dev"
+- '2.7'
+- '3.5'
+- '3.6'
+- 3.6-dev
+- 3.7-dev
 services:
-  - docker
+- docker
 addons:
   apt:
     packages:
-      - libblas-dev
-      - liblapack-dev
-      - libatlas-base-dev
-      - libopenblas-base
-      - libopenblas-dev
-      - build-essential
-      - libssl-dev
-      - uuid-dev
-      - libgpgme11-dev
-      - squashfs-tools
-      - libseccomp-dev
-      - wget
-      - pkg-config
+    - libblas-dev
+    - liblapack-dev
+    - libatlas-base-dev
+    - libopenblas-base
+    - libopenblas-dev
+    - build-essential
+    - libssl-dev
+    - uuid-dev
+    - libgpgme11-dev
+    - squashfs-tools
+    - libseccomp-dev
+    - wget
+    - pkg-config
 install:
-  - pip install codecov
-  - pip install -r requirements.txt
-  - pip install -r test_requirements.txt
-  - mkdir -p \tmp\solver_output
+- pip install codecov
+- pip install -r requirements.txt
+- pip install -r test_requirements.txt
+- mkdir -p \tmp\solver_output
 before_install:
-  - docker-compose up -d
-  - /bin/bash .travis/singularity_setup.sh
+- docker-compose up -d
+- "/bin/bash .travis/singularity_setup.sh"
 env:
   global:
-    - BIGFETA_OUTPUT_DIR=/tmp/solver_output
-    - RENDER_HOST=localhost
-    - RENDER_PORT=8080
-    - secure: gIvBfWzWZizVxIW3eJfMX4V4/wrtn6zVoI9lkDbnXgn42+jIUdZYLEnHdZDtgOYtwUHUiY0UuXX/D9pl5XK+5IrZ+ocRKv8vIL1APJNxJGWJThkk8ifQFn+fuG2MvlA1b3z3903FNMSw3AcG0479YucZkPx7TmexU5DHM/zf/+/KvCV5qDPKjZu4hL3o/njuwNZGpYmT0+pUvugiAhF1c5YBmPBMhaplUYKdjuGMeLOlB/QxmBdkTPWCeVda8ohB3ngGc2yjhtDPAaOo9LKNrdLje6DCr2Zv6e4qo27YNFpXoICN0qUPOaoGOoVJ/HOq8HUZgJMi9KiYH2oqP27RqPOHaGABK7PF5aMg6vvUBcCYP4n93rnbm7g4k/+A/mUeew9lXyrh8+O9d8ul5eNfLdaQ1HGnR093Vx53Sr7Q9lyNU/PUteMGzRYQw2EQGuryGiAKJ5tWD9HIHtqQ7iNZup8ijHCKVdmtLHROTHMvpcagQ33Sl/+U05E50YoDZRzvTNSaWUoNhl01xRIyp35KYy55Ei2X8eMTJlirdzKj1hAeOED98SmKx8ROypxJDzcO/N8AGlPRc9/l+OplKTvpnlD3Nsd/bxErWEmrBDtAkY05rfR48e9xtDyqV4KuAXy0wBJn5eqFEFpNNxzMi78CHsF023UodVsWAzn4HvAojrQ=
-    - secure: JAtkbLViGYXi63DnlXVBTbZRPCFdgzLsyVkL+9CU9uvadvhT+Cst6Lgl1ltkiLEAHHXAv0aPr+Qv4Q7+mTOJOciT9hxFIpa7EqIP4a8fq0dZyqyFylx1cGZV2So+8eFiCkUyMhko4VhouWmI97j+NpgOpE1uO2TZowqHLeobH7/V4plpOdteJBIAV6VJa2CMlOAOCoG65FxcylHpr7EHwGcOenPfF4kzolsjhK6jO0P5fU+YJ1E4jscQT1R8iInzjvcXz3tm5wSmAqjbPsvaOXURo6Oy0Xuz93W5J1dW0DCHqssEyv/vd8d+2DmBuU+kYGtyY8mIKlXd9OInJZafRGESuKnthRIseqdxYmNMI9+iVdmZ00ANdDAYF+752yqJ/G6Pi4XXrkzccv7ygkFUXb7lIjuCSziE26sr3+q5OHYHSYoA3EO0lMsBcbUj8WFxz5HEk6n+ZJofr49yVWXO7CI3EKzvA0un7wSdhxMjj0Fs1dArDveLoAZTFOzJJXv9Cj3/gWdXHtGJyVhJtxJc7wUofur9beak+pgX2nNg7JWDvc+uZ3mvoGr4p9aEaGVl3zfQ7YZ879/SHc7ihgb1DEltxuft53iJPyaa9nTvl63BUha2E8tFIvZsYehweO7fftq7CY6Y8m7NxZMawcKbIWjHNTZUhBv8U5KPtLgqs0I=
-    - secure: JGbQl7niiYNxLttqfOj8m0rOXHXbK9NVHheu8OqJlr5bdn+8HngZFaMQW9sJtq0aeVHjOTOPhf6bpQvb6Uy8fLMqZU1cQnLAxpENvm5apqtjs5xrhN0aaFJd7dFMv8ViLUU6xf8LYkvZyzP9nL2WSIZ99gk7upDR/p29Jq+tz4R522L5liknpNwrRSQvG/1jQeDLIQ6LXWSfpxScPRZFT0AWvbUmcNU6TKPXASnVpKRvgm/sisQH99iHgEqYn75xT7Ozisl0UMwJ6Pl9h6x/PwmlE+vlvIRyg2UpXn38gAvWHjL59jCVd/fpTe7cm4fKp26ochi7wIJnVdUloCPy8cyN8yoTkuDddvd5eEPCf9Wr4gNnTu7E/sylryafnWnKfLi3gXKdPG//8kZTzBHPzDH5dzxyiOY2Zn9y2e4fTfq5y2Q+pCwfmEDY+q6wymMCuvPAND7ykdz7PhPx0O8X4fU7zn+G3ePI1aOCs2mMC1omYy5YGRuK7waRauXqZmreQZ1f3rMJ6gF1xIOYfniDVFQ4UjvpgBb86GMGSjeXxcOSO/jNYcBOepoxVni1AuPX5L/4K1PgTRNjGM726sGshZHUTEc1uqqO5kyTp5w2nbFOeNXwtYD/VhCOKDRm6EF1MGmdVT7dERsZldN9WKcJetDwo+Vq1mFcsItoIWiy6cs=
-    - secure: BHefw1uJ0pVGIiPf9Jb1sMT8f5Dq4QmHjmyfa326QnLceYKci6XxWUYXTu2V8R4hEGmlW6b9cl074+fFlI9HjFJZnb8+P5M54IeRbgP8Y6e0w1gaFR75NNS+FU0ZmLCKN6zCZIkjQdjRE+4XtXwya6F4u/pilNgtyOgoIY+L/I2+0ZjOxcJ/yKFsPyTxg28H66P6b7BjwzrpoYabTUapJFd7KLMbCCpstw5/3aLhkvYMrmEM2h6Lcde0+Ne5UPZ2BFFP0Zcf31sV2i3jpnzbpCs7A9jl+s+UOBIWwjaV3lEuGM5cgfIII/3nhdYeGJ6KyXXXIiTcOlns+suTw5II04DyXtG7ltJ3Jue3AtYa2Drj9oM111WqoolDyuQfxX66IDKe2mb96iyQBf78cCjm3zVyipSGDntpBEq44Ss/f7d/Hl7m/Ls5Soh50DWDr8TXkYSMib/5xbAF+N28PUs0BYR+dgIqFDgZ8bLOPcw1E10L4LZwZ+E0kp8JKX2sWZe7XveFgNv4d2fJpqkp/1zis69z6pKMZrQWur6+ZahxOWHpUdOWndK2cPXe8PvUyRhHlUayb15FIAjRRStdSZt7t+9yRnNJisPZKpRUwMZrKZDUK/8Pvn76Z8FmEd18c7kBOSSTaR0iGa25ganP+Fqvzh986qEm8nC8ZcpaQqpE8NE=
+  - BIGFETA_OUTPUT_DIR=/tmp/solver_output
+  - RENDER_HOST=localhost
+  - RENDER_PORT=8080
+  - secure: Ui2hz09gJZNviW+qbTAHyTVlx8gd5kGGsYXrfpRmHdCR49zp+Tkv1LYwKrqLWGjQA3AMjAgdIGJgDpA+LT1w1KU3dL4J9JEXuBsVvhu4RkMvO+Oy2KhVrxGEeokNyyN5c4i8j8dHkEzwLEq/g2OYoHhqRpmuLl4et9D8X6vowy3+1hDf/ku/FXHHdcUti9WvyuqDQ+9Y3rcTgWFqC4CAQwXJHSSzfAduc3LYC9BsEAdRyxG8VmgnkIspmuQBVRBFLElVZX9UlLmR71fgOzTtVML06UKv2cm1JU0ylA6WC8pbJVOPDZ3OQLDOBOC99nEz8HUD2E7x4ixxlHx0AE1Qs/Dsb2d+JGwPoSi6JNobQGNIhmkrPf957g6MsMHgH23dNWUSpAkDx6OzCNPEqobP4T3JigWnHOLFwWxav49dsGWneLB9QHE1Landr1rlUegXiuXWm7T3z5hSjIfT6Bun7lQmd/7Qms8osKJz8LJJIvsV8tq5qWe21G8MCCIK/ypje0JJwBo7LiqFmpCbviIXcqngGvzHsww8yNFu4Wx7NYfoAcdCorbJmggk1caoX2SIs5HxLRgxfSQxGW+Ty1JhlliWT2kxfsM7tGfw/AcS9idFTCY160M3Y8tbdE2q9AITiqAB5vsBTy1pLM8MFlm2NrfoOYX1NhaUpaVdZh8qNH8=
 script:
-  - sudo singularity build bigfeta/distributed/bin/petsc_solver.simf bigfeta/distributed/src/Singularity.petsc_solver
-  - python setup.py test
+- sudo singularity build bigfeta/distributed/bin/petsc_solver.simf bigfeta/distributed/src/Singularity.petsc_solver
+- python setup.py test
 cache:
   pip: true
   directories:
-    - "$HOME/.m2"
+  - "$HOME/.m2"
 after_success:
-  - codecov -t 926fc795-35a7-4634-8404-ac33ece5041b
-  - "BRANCHES_TO_MERGE_REGEX='develop' BRANCH_TO_MERGE_INTO=master GITHUB_REPO=AllenInstitute/bigfeta .travis/merge_script.sh"
-after_failure:
-  docker logs --tail 20 $(docker-compose ps -q renderservice)
+- codecov -t 926fc795-35a7-4634-8404-ac33ece5041b
+- BRANCHES_TO_MERGE_REGEX='develop' BRANCH_TO_MERGE_INTO=master GITHUB_REPO=AllenInstitute/bigfeta
+  .travis/merge_script.sh
+after_failure: docker logs --tail 20 $(docker-compose ps -q renderservice)
