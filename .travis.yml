@@ -49,7 +49,7 @@ cache:
   directories:
     - "$HOME/.m2"
 after_success:
-  - codecov -t 31f0f992-618d-4d7d-9da2-69f45c32455e
+  - codecov -t 926fc795-35a7-4634-8404-ac33ece5041b
   - "BRANCHES_TO_MERGE_REGEX='develop' BRANCH_TO_MERGE_INTO=master GITHUB_REPO=AllenInstitute/bigfeta .travis/merge_script.sh"
 after_failure:
   docker logs --tail 20 $(docker-compose ps -q renderservice)
