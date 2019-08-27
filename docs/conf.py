@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# EMaligner documentation build configuration file, created by
+# BigFeta documentation build configuration file, created by
 # sphinx-quickstart on Mon May 20 10:03:21 2019.
 #
 # This file is execfile()d with the current directory set to its

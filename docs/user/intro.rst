@@ -21,7 +21,7 @@ Important Dependencies
 Detailed Argument Descriptions
 ------------------------------
 
-see :ref:`ema-schema-label`
+see :ref:`bigfeta-schema-label`
 
 Distributed Usage
 -----------------
