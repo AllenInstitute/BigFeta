@@ -1,11 +1,11 @@
-EMaligner
+BigFeta
 =========
 
 .. toctree::
    :maxdepth: 4
 
    schemas
-   EMaligner
+   bigfeta
    utils
    transforms
    jsongz

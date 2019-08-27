@@ -1,8 +1,7 @@
-utils 
+BigFeta
 =========
 
-.. automodule:: EMaligner.utils
+.. automodule:: bigfeta.bigfeta
     :members: 
     :undoc-members:
     :show-inheritance:
-

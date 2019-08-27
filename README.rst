@@ -8,10 +8,10 @@
   :alt: Documentation Status
   
 
-bigfeta
+BigFeta
 #################
 
-Alignment of features. Builds sparse matrices from tilespecs and pointmatch collections and solves for new transforms using constrained linear least squares.
+Global linear-least squares solution of transforms for alignment of features.
 
 Level of support
 ################
