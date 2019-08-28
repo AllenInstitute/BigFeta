@@ -7,7 +7,6 @@
   :target: https://bigfeta.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
 
-
 BigFeta
 #################
 
