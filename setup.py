@@ -28,11 +28,14 @@ with open('test_requirements.txt', 'r') as f:
 with open('requirements.txt', 'r') as f:
     required = f.read().splitlines()
 
+with open("README.rst", "r") as fh:
+    long_description = fh.read()
+
 setup(name='bigfeta',
       use_scm_version=True,
-      description='a python package to solve for transformations of image tiles, given point matches' 
-                  'between those tiles and their transformations stored in a render database '
-                  'databases see https://github.com/saalfeldlab/render and https://github.com/khaledkhairy/EM_aligner',
+      description='global alignment of features between images',
+      long_description=long_description,
+      long_descritpion_content_type="text/x-rst",
       author='Daniel Kapner',
       author_email='danielk@alleninstitute.org',
       url='https://github.com/AllenInstitute/bigfeta',
