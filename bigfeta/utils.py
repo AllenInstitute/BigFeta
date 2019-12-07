@@ -307,8 +307,9 @@ def get_matches(iId, jId, collection, dbconnection):
     matches = []
     if collection['db_interface'] == 'file':
         matches = jsongz.load(collection['input_file'])
+        sections = set([iId, jId])
         matches = [m for m in matches
-                   if set([m['pGroupId'], m['qGroupId']]) & set([iId, jId])]
+                   if set([m['pGroupId'], m['qGroupId']]) == sections]
     if collection['db_interface'] == 'render':
         with requests.Session() as s:
             s.mount('http://', requests.adapters.HTTPAdapter(max_retries=5))
