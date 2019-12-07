@@ -192,7 +192,9 @@ def get_resolved_from_z(stack, tform_name, fullsize, order, z):
     if stack['db_interface'] == 'render':
         try:
             with requests.Session() as s:
-                s.mount('http://', requests.adapters.HTTPAdapter(max_retries=5))
+                s.mount(
+                        'http://',
+                        requests.adapters.HTTPAdapter(max_retries=5))
                 resolved = renderapi.resolvedtiles.get_resolved_tiles_from_z(
                         stack['name'][0],
                         float(z),
@@ -307,19 +309,21 @@ def get_matches(iId, jId, collection, dbconnection):
     matches = []
     if collection['db_interface'] == 'file':
         matches = jsongz.load(collection['input_file'])
+        sections = set([iId, jId])
         matches = [m for m in matches
-                   if set([m['pGroupId'], m['qGroupId']]) & set([iId, jId])]
+                   if set([m['pGroupId'], m['qGroupId']]) == sections]
     if collection['db_interface'] == 'render':
         with requests.Session() as s:
             s.mount('http://', requests.adapters.HTTPAdapter(max_retries=5))
             if iId == jId:
                 for name in collection['name']:
-                    matches.extend(renderapi.pointmatch.get_matches_within_group(
-                            name,
-                            iId,
-                            owner=collection['owner'],
-                            render=dbconnection,
-                            session=s))
+                    matches.extend(
+                            renderapi.pointmatch.get_matches_within_group(
+                                name,
+                                iId,
+                                owner=collection['owner'],
+                                render=dbconnection,
+                                session=s))
             else:
                 for name in collection['name']:
                     matches.extend(
