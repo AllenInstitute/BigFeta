@@ -192,7 +192,9 @@ def get_resolved_from_z(stack, tform_name, fullsize, order, z):
     if stack['db_interface'] == 'render':
         try:
             with requests.Session() as s:
-                s.mount('http://', requests.adapters.HTTPAdapter(max_retries=5))
+                s.mount(
+                        'http://',
+                        requests.adapters.HTTPAdapter(max_retries=5))
                 resolved = renderapi.resolvedtiles.get_resolved_tiles_from_z(
                         stack['name'][0],
                         float(z),
@@ -315,12 +317,13 @@ def get_matches(iId, jId, collection, dbconnection):
             s.mount('http://', requests.adapters.HTTPAdapter(max_retries=5))
             if iId == jId:
                 for name in collection['name']:
-                    matches.extend(renderapi.pointmatch.get_matches_within_group(
-                            name,
-                            iId,
-                            owner=collection['owner'],
-                            render=dbconnection,
-                            session=s))
+                    matches.extend(
+                            renderapi.pointmatch.get_matches_within_group(
+                                name,
+                                iId,
+                                owner=collection['owner'],
+                                render=dbconnection,
+                                session=s))
             else:
                 for name in collection['name']:
                     matches.extend(
