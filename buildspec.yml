@@ -1,0 +1,17 @@
+version: 0.2
+
+runtimes:
+  python:
+    versions:
+      3.8:
+        commands:
+          - echo "Installing Python version 3.8 ..."
+          - pyenv global  $PYTHON_38_VERSION
+phases:
+  build:
+    commands:
+      - pip install -r requirements.txt
+      - python setup.py test
+  post_build:
+    commands:
+      - echo Build completed on `date`
