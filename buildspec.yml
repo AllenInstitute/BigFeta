@@ -11,7 +11,7 @@ phases:
   install:
     commands:
       - pip install -r requirements.txt  
-  test:
+  build:
     commands:
       - python setup.py test
   post_build:
