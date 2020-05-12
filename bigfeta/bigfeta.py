@@ -175,6 +175,21 @@ def tilepair_weight(z1, z2, matrix_assembly):
 
 
 def _filter_to_products(contains_products, iterables_it):
+    """return list of values filtered to only those values which
+        are in the product of a list of iterables.
+
+    Parameters
+    ----------
+    contains_products : list
+        list to be filtered to values containing products
+    iterables_it : iterable of iterables
+        iterable of iterables as in inputs to itertools.product
+
+    Returns
+    -------
+    filtered_products : list
+        list of values in contains_products which are products of the iterables
+    """
     return [p for p in contains_products
             if all([p[i] in it for i, it in enumerate(iterables_it)])]
 
@@ -184,6 +199,39 @@ def create_CSR_A_fromobjects(
         transform_apply, regularization_dict, matrix_assembly_dict,
         order=2, fullsize=False,
         return_draft_resolvedtiles=False, copy_resolvedtiles=True):
+    """Assembles results as in BigFeta.create_CSR_A from
+        resolvedtiles and pointmatches
+
+    Parameters
+    ----------
+    resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
+        resolvedtiles object containing tiles to consider during assembly
+    matches : list of dict
+        pointmatches in render format
+    transform_name : string
+        string describing model for which to solve (see Schema)
+    transform_apply : list of int
+        additional transforms to apply to pointmatches
+    regularization_dict : dict
+        regularization parameters (see Schema)
+    matrix_assembly_dict : dict
+        matrix assembly parameters (see Schema)
+    order : int
+        order for polynomial transform
+    fullsize : boolean
+        whether to use fullsize matrices
+    return_draft_resolvedtiles : boolean
+        whether to return draft_resolvedtiles -- used to apply transforms
+    copy_resolvedtiles : boolean
+        whether to make copy of the input resolvedtiles or process in place
+
+    Returns
+    -------
+    func_result : dict
+        dictionary with keys "x", "reg", "A", "weights", "rhs"
+    draft_resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
+        resolvedtiles object with AlignerTransforms used to derive result
+    """
 
     func_result = {}
 
