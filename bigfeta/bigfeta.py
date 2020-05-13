@@ -590,7 +590,7 @@ class BigFeta(argschema.ArgSchemaParser):
             self.args['matrix_assembly']['depth'])
 
         with concurrent.futures.ThreadPoolExecutor(
-                max_workers=self.args["pool_size"]) as e:
+                max_workers=self.args["n_parallel_jobs"]) as e:
 
             matches_fut = [
                 e.submit(
