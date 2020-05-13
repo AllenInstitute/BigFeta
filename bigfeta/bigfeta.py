@@ -608,7 +608,7 @@ class BigFeta(argschema.ArgSchemaParser):
         CSR_A = create_CSR_A_fromobjects(
             self.resolvedtiles, matches, self.args["transformation"],
             self.args["transform_apply"], self.args["regularization"],
-            self.args["matrix_assembly"], self.args["order"],
+            self.args["matrix_assembly"], self.args["poly_order"],
             self.args["fullsize_transform"], copy_resolvedtiles=False)
         # CSR_A = self.create_CSR_A(self.resolvedtiles)
 
