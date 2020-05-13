@@ -199,7 +199,8 @@ def create_CSR_A_fromobjects(
         resolvedtiles, matches, transform_name,
         transform_apply, regularization_dict, matrix_assembly_dict,
         order=2, fullsize=False,
-        return_draft_resolvedtiles=False, copy_resolvedtiles=True):
+        return_draft_resolvedtiles=False, copy_resolvedtiles=True,
+        results_in_chunks=False):
     """Assembles results as in BigFeta.create_CSR_A from
         resolvedtiles and pointmatches
 
@@ -225,6 +226,9 @@ def create_CSR_A_fromobjects(
         whether to return draft_resolvedtiles -- used to apply transforms
     copy_resolvedtiles : boolean
         whether to make copy of the input resolvedtiles or process in place
+    results_in_chunks : boolean
+        whether to return another dicitonary item "A_weights_rhs_z_chunks"
+        with chunked results (for writing to hdf5)
 
     Returns
     -------
@@ -352,8 +356,12 @@ def create_CSR_A_fromobjects(
     func_result["x"] = np.concatenate(func_result["x"])
     func_result["reg"] = sparse.diags(
             [np.concatenate(reg)], [0], format='csr')
+
     func_result["A"], func_result["weights"], func_result["rhs"], _ = (
         utils.concatenate_results(np.array(chunks)))
+
+    if results_in_chunks:
+        func_result["A_weights_rhs_z_chunks"] = chunks
 
     return ((func_result, draft_resolvedtiles)
             if return_draft_resolvedtiles else func_result)
@@ -615,7 +623,8 @@ class BigFeta(argschema.ArgSchemaParser):
             self.resolvedtiles, matches, self.args["transformation"],
             self.args["transform_apply"], self.args["regularization"],
             self.args["matrix_assembly"], self.args["poly_order"],
-            self.args["fullsize_transform"], copy_resolvedtiles=False)
+            self.args["fullsize_transform"], copy_resolvedtiles=False,
+            results_in_chunks=(self.args["output_mode"] == "hdf5"))
         # CSR_A = self.create_CSR_A(self.resolvedtiles)
 
         assemble_result = {}
@@ -627,11 +636,30 @@ class BigFeta(argschema.ArgSchemaParser):
 
         # output the regularization vectors to hdf5 file
         if self.args['output_mode'] == 'hdf5':
+            results = np.array(CSR_A["A_weights_rhs_z_chunks"])
+
+            if self.args['hdf5_options']['chunks_per_file'] == -1:
+                proc_chunks = [np.arange(results.size)]
+            else:
+                proc_chunks = np.array_split(
+                    np.arange(results.size),
+                    np.ceil(
+                        results.size /
+                        self.args['hdf5_options']['chunks_per_file']))
+
+            metadata = []
+            for pchunk in proc_chunks:
+                A, w, rhs, z = utils.concatenate_results(results[pchunk])
+                if A is not None:
+                    fname = self.args['hdf5_options']['output_dir'] + \
+                        '/%d_%d.h5' % (z.min(), z.max())
+                    metadata.append(
+                        utils.write_chunk_to_file(fname, A, w.data, rhs))
 
             utils.write_reg_and_tforms(
                 dict(self.args),
                 self.resolvedtiles,
-                CSR_A['metadata'],
+                metadata,
                 assemble_result['x'],
                 assemble_result['reg'])
 
