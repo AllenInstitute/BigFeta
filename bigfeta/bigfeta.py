@@ -287,7 +287,13 @@ def create_CSR_A_fromobjects(
     chunks = []
 
     for pair in pairs:
-        id_tree = group_id_tree[(pair["section1"], pair["section2"])]
+        try:
+            id_tree = group_id_tree[(pair["section1"], pair["section2"])]
+        except KeyError:
+            logger.debug(
+                "no tile pairs for pointmatch groupIds: {} and {}".format(
+                    pair["section1"], pair["section2"]))
+            continue
 
         tspecs1 = z_section_tree[(pair["z1"], pair["section1"])].keys()
         tspecs2 = z_section_tree[(pair["z2"], pair["section2"])].keys()
