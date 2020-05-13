@@ -838,8 +838,11 @@ def blocks_from_tilespec_pair(
         weights for the rows in pblock and qblock
     """
 
-    if np.all(np.array(match['matches']['w']) == 0):
+    # if np.all(np.array(match['matches']['w']) == 0):
+    #     return None, None, None, None
+    if not any(match["matches"]["w"]):
         return None, None, None, None
+
 
     if len(match['matches']['w']) < matrix_assembly['npts_min']:
         return None, None, None, None
@@ -870,7 +873,7 @@ def blocks_from_tilespec_pair(
     return pblock, qblock, weights, qrhs - prhs
 
 
-def concatenate_results(results):
+def concatenate_results(results, pop_rhs=False, pop_zlist=False):
     """row concatenates sparse matrix blocks and associated vectors
 
     Parameters
@@ -901,8 +904,12 @@ def concatenate_results(results):
                 [np.concatenate([r['weights'] for r in results[ind]])],
                 [0],
                 format='csr')
-    rhs = np.concatenate([r.pop('rhs') for r in results[ind]])
-    zlist = np.concatenate([r.pop('zlist') for r in results[ind]])
+    rhs = np.concatenate([
+        (r.pop('rhs') if pop_rhs else r["rhs"])
+        for r in results[ind]])
+    zlist = np.concatenate([
+        (r.pop('zlist') if pop_zlist else r["zlist"])
+        for r in results[ind]])
 
     return A, weights, rhs, zlist
 
