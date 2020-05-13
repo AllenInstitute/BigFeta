@@ -1,4 +1,5 @@
 import copy
+import concurrent.futures
 import numpy as np
 import renderapi
 import argschema
@@ -584,7 +585,32 @@ class BigFeta(argschema.ArgSchemaParser):
 
         """
         # create A matrix in compressed sparse row (CSR) format
-        CSR_A = self.create_CSR_A(self.resolvedtiles)
+        pairs = utils.determine_zvalue_pairs(
+            self.resolvedtiles,
+            self.args['matrix_assembly']['depth'])
+
+        with concurrent.futures.WithThreadPool(
+                max_workers=self.args["pool_size"]) as e:
+
+            matches_fut = [
+                e.submit(
+                    utils.get_matches,
+                    pair['section1'],
+                    pair['section2'],
+                    self.args['pointmatch'],
+                    utils.make_dbconnection(self.args['pointmatch']))
+                for pair in pairs]
+
+            matches = []
+            for f in concurrent.futures.as_completed(matches_fut):
+                matches += f.result()
+
+        CSR_A = create_CSR_A_fromobjects(
+            self.resolvedtiles, matches, self.args["transformation"],
+            self.args["transform_apply"], self.args["regularization"],
+            self.args["matrix_assembly"], self.args["order"],
+            self.args["fullsize_transform"], copy_resolvedtiles=False)
+        # CSR_A = self.create_CSR_A(self.resolvedtiles)
 
         assemble_result = {}
         assemble_result['A'] = CSR_A.pop('A')
