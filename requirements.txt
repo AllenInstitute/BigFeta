@@ -10,3 +10,4 @@ mpl_scatter_density
 descartes
 shapely
 pathos
+futures; python_version == "2.7"
