@@ -6,6 +6,7 @@ import argschema
 from ..schemas import *
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
 import mpl_scatter_density
 
 
@@ -145,6 +146,7 @@ class CheckResiduals(argschema.ArgSchemaParser):
                     plot_coords[:, 0],
                     plot_coords[:, 1],
                     c=c,
+                    norm=Normalize(),
                     cmap=self.cmap)
         else:
             density = ax.scatter(
