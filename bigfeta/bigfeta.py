@@ -200,7 +200,7 @@ def create_CSR_A_fromobjects(
         transform_apply, regularization_dict, matrix_assembly_dict,
         order=2, fullsize=False,
         return_draft_resolvedtiles=False, copy_resolvedtiles=True,
-        results_in_chunks=False):
+        results_in_chunks=False, tiles_prepared=False):
     """Assembles results as in BigFeta.create_CSR_A from
         resolvedtiles and pointmatches
 
@@ -229,6 +229,9 @@ def create_CSR_A_fromobjects(
     results_in_chunks : boolean
         whether to return another dicitonary item "A_weights_rhs_z_chunks"
         with chunked results (for writing to hdf5)
+    tiles_prepared : boolean
+        whether tile transformations are prepared ahead to time.
+        If True will not append transform based on input parameters.
 
     Returns
     -------
@@ -242,10 +245,10 @@ def create_CSR_A_fromobjects(
 
     draft_resolvedtiles = (
         copy.deepcopy(resolvedtiles) if copy_resolvedtiles else resolvedtiles)
-
-    utils.ready_transforms(
-        draft_resolvedtiles.tilespecs, transform_name,
-        fullsize, order)
+    if not tiles_prepared:
+        utils.ready_transforms(
+            draft_resolvedtiles.tilespecs, transform_name,
+            fullsize, order)
 
     # this emulates the pre_load behavior of the schema
     depth = (
