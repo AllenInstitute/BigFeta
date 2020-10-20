@@ -2,7 +2,7 @@ import renderapi
 import numpy as np
 from scipy.sparse import csr_matrix
 from scipy.linalg import block_diag
-from .utils import aff_matrix, AlignerTransformException
+from .utils import aff_matrix, aff_matrices, AlignerTransformException
 __all__ = ['AlignerRotationModel']
 
 
@@ -123,9 +123,9 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
     @staticmethod
     def preprocess(ppts, qpts, w):
         """tilepair-level preprocessing step for rotation transform.
-           derives the relative center-of-mass angles between all 
+           derives the relative center-of-mass angles between all
            p's and q's to avoid angular discontinuity. Will filter
-           out points very close to center-of-mass. 
+           out points very close to center-of-mass.
            Tilepairs with relative rotations near 180deg will not avoid
            the discontinuity.
 
@@ -154,9 +154,11 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
         qcm = qpts - qpts.mean(axis=0)
 
         # points very close to center of mass are noisy
-        rfilter = np.argwhere(
-                (np.linalg.norm(pcm, axis=1) > 15) &
-                (np.linalg.norm(qcm, axis=1) > 15)).flatten()
+        # rfilter = np.argwhere(
+        #         (np.linalg.norm(pcm, axis=1) > 15) &
+        #         (np.linalg.norm(qcm, axis=1) > 15)).flatten()
+        rfilter = ((np.linalg.norm(pcm, axis=1) > 15) &
+                   (np.linalg.norm(qcm, axis=1) > 15))
         pcm = pcm[rfilter]
         qcm = qcm[rfilter]
         w = w[rfilter]
@@ -164,7 +166,8 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
         pangs = np.arctan2(pcm[:, 1], pcm[:, 0])
 
         # rotate all the q values relative to p
-        ams = block_diag(*[aff_matrix(-i) for i in pangs])
+        # ams = block_diag(*[aff_matrix(-i) for i in pangs])
+        ams = block_diag(*aff_matrices(-1. * pangs))
         qrot = ams.dot(qcm.flatten()).reshape(-1, 2)
 
         delta_angs = np.arctan2(qrot[:, 1], qrot[:, 0])
