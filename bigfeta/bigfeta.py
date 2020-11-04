@@ -328,6 +328,8 @@ class BigFeta(argschema.ArgSchemaParser):
                 results = json.loads(f.get('results')[()][0].decode('utf-8'))
 
             r = f.get('resolved_tiles')[()][0]
+            r = (r.decode() if not isinstance(r, str) else r)
+
             rname = os.path.join(
                     os.path.dirname(filename),
                     r)
