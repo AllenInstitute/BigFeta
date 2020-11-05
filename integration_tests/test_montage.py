@@ -270,3 +270,38 @@ def test_render_output(
     assert np.all(np.array(mod.results['precision']) < 1e-7)
     assert np.all(np.array(mod.results['error']) < 200)
     del mod
+
+
+@pytest.fixture(scope="module")
+def resolvedtiles_obj():
+    yield renderapi.resolvedtiles.ResolvedTiles(
+        tilespecs=[renderapi.tilespec.TileSpec(json=d)
+                   for d in montage_raw_tilespecs_json])
+
+
+@pytest.fixture(scope="module")
+def matches_obj():
+    with open(FILE_PMS, 'r') as f:
+        matches = json.load(f)
+    yield matches
+
+
+def test_run_resolvedtiles(resolvedtiles_obj, matches_obj):
+    p = copy.deepcopy(montage_parameters)
+
+    rts = renderapi.resolvedtiles.ResolvedTiles(
+        tilespecs=[ts for ts in resolvedtiles_obj.tilespecs
+                   if p["first_section"] <= ts.z <= p["last_section"]],
+        transformList=resolvedtiles_obj.transforms)
+
+    fr, draft_rts = bigfeta.create_CSR_A_fromobjects(
+        rts, matches_obj, p["transformation"],
+        [],  # default empty transform_apply
+        p["regularization"], p["matrix_assembly"],
+        return_draft_resolvedtiles=True)
+
+    sol = bigfeta.utils.solve(
+        fr["A"], fr["weights"], fr["reg"], fr["x"], fr["rhs"])
+
+    assert np.all(np.array(sol['precision']) < 1e-7)
+    assert np.all(np.array(sol['error']) < 200)

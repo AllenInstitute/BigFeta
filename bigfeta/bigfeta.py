@@ -1,3 +1,5 @@
+import copy
+import concurrent.futures
 import numpy as np
 import renderapi
 import argschema
@@ -17,6 +19,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.resetwarnings()
 
 logger = logging.getLogger(__name__)
+default_logger = logger
 
 
 def calculate_processing_chunk(fargs):
@@ -159,7 +162,7 @@ def tilepair_weight(z1, z2, matrix_assembly):
         weight factor
 
     """
-    if matrix_assembly['explicit_weight_by_depth'] is not None:
+    if matrix_assembly.get('explicit_weight_by_depth') is not None:
         ind = matrix_assembly['depth'].index(int(np.abs(z1 - z2)))
         tp_weight = matrix_assembly['explicit_weight_by_depth'][ind]
     else:
@@ -170,6 +173,198 @@ def tilepair_weight(z1, z2, matrix_assembly):
             if matrix_assembly['inverse_dz']:
                 tp_weight = tp_weight/(np.abs(z2 - z1) + 1)
     return tp_weight
+
+
+def _filter_to_products(contains_products, iterables_it):
+    """return list of values filtered to only those values which
+        are in the product of a list of iterables.
+
+    Parameters
+    ----------
+    contains_products : list
+        list to be filtered to values containing products
+    iterables_it : iterable of iterables
+        iterable of iterables as in inputs to itertools.product
+
+    Returns
+    -------
+    filtered_products : list
+        list of values in contains_products which are products of the iterables
+    """
+    return [p for p in contains_products
+            if all([p[i] in it for i, it in enumerate(iterables_it)])]
+
+
+def create_CSR_A_fromobjects(
+        resolvedtiles, matches, transform_name,
+        transform_apply, regularization_dict, matrix_assembly_dict,
+        order=2, fullsize=False,
+        return_draft_resolvedtiles=False, copy_resolvedtiles=True,
+        results_in_chunks=False):
+    """Assembles results as in BigFeta.create_CSR_A from
+        resolvedtiles and pointmatches
+
+    Parameters
+    ----------
+    resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
+        resolvedtiles object containing tiles to consider during assembly
+    matches : list of dict
+        pointmatches in render format
+    transform_name : string
+        string describing model for which to solve (see Schema)
+    transform_apply : list of int
+        additional transforms to apply to pointmatches
+    regularization_dict : dict
+        regularization parameters (see Schema)
+    matrix_assembly_dict : dict
+        matrix assembly parameters (see Schema)
+    order : int
+        order for polynomial transform
+    fullsize : boolean
+        whether to use fullsize matrices
+    return_draft_resolvedtiles : boolean
+        whether to return draft_resolvedtiles -- used to apply transforms
+    copy_resolvedtiles : boolean
+        whether to make copy of the input resolvedtiles or process in place
+    results_in_chunks : boolean
+        whether to return another dicitonary item "A_weights_rhs_z_chunks"
+        with chunked results (for writing to hdf5)
+
+    Returns
+    -------
+    func_result : dict
+        dictionary with keys "x", "reg", "A", "weights", "rhs"
+    draft_resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
+        resolvedtiles object with AlignerTransforms used to derive result
+    """
+
+    func_result = {}
+
+    draft_resolvedtiles = (
+        copy.deepcopy(resolvedtiles) if copy_resolvedtiles else resolvedtiles)
+
+    utils.ready_transforms(
+        draft_resolvedtiles.tilespecs, transform_name,
+        fullsize, order)
+
+    # this emulates the pre_load behavior of the schema
+    depth = (
+        matrix_assembly_dict["depth"] if isinstance(
+           matrix_assembly_dict["depth"], list)
+        else list(range(matrix_assembly_dict["depth"]+1)))
+
+    pairs = utils.determine_zvalue_pairs(
+        draft_resolvedtiles, depth)
+
+    # the column indices for each tilespec
+    col_ind = np.cumsum(
+        np.hstack((
+            [0],
+            [t.tforms[-1].DOF_per_tile
+             for t in draft_resolvedtiles.tilespecs])))
+    ncol = col_ind.max()  # TODO is this correct?
+
+    tId_to_col_idx = {
+        ts.tileId: col_ind[i]
+        for i, ts in enumerate(draft_resolvedtiles.tilespecs)}
+    tId_to_tspec = {
+        ts.tileId: ts for ts in draft_resolvedtiles.tilespecs}
+
+    group_id_tree = {}
+    for m in matches:
+        group_pair = (m["pGroupId"], m["qGroupId"])
+        id_pair = (m["pId"], m["qId"])
+        try:
+            group_id_tree[group_pair][id_pair] = m
+        except KeyError:
+            group_id_tree[group_pair] = {id_pair: m}
+
+    z_section_tree = {}
+    for ts in draft_resolvedtiles.tilespecs:
+        try:
+            z_section_tree[(ts.z, ts.layout.sectionId)][ts.tileId] = ts
+        except KeyError:
+            z_section_tree[(ts.z, ts.layout.sectionId)] = {ts.tileId: ts}
+
+    # TODO how useful is it to chunk this -- I have the feeling most of the
+    #   time is spent in calls to the REST api
+    chunks = []
+
+    for pair in pairs:
+        try:
+            id_tree = group_id_tree[(pair["section1"], pair["section2"])]
+        except KeyError:
+            logger.debug(
+                "no tile pairs for pointmatch groupIds: {} and {}".format(
+                    pair["section1"], pair["section2"]))
+            continue
+
+        tspecs1 = z_section_tree[(pair["z1"], pair["section1"])].keys()
+        tspecs2 = z_section_tree[(pair["z2"], pair["section2"])].keys()
+
+        tilepair_weightfac = tilepair_weight(
+            pair["z1"], pair["z2"], matrix_assembly_dict)
+
+        valid_match_keys = _filter_to_products(
+            id_tree.keys(), [tspecs1, tspecs2])
+
+        wts = []
+        pblocks = []
+        qblocks = []
+        rhss = []
+        for (pId, qId), match in ((k, id_tree[k]) for k in valid_match_keys):
+            tformed_match = utils.transform_match(
+                match, tId_to_tspec[pId], tId_to_tspec[qId], transform_apply,
+                draft_resolvedtiles.transforms)
+
+            pblock, qblock, weights, rhs = utils.blocks_from_tilespec_pair(
+                tId_to_tspec[pId],
+                tId_to_tspec[qId],
+                tformed_match,
+                tId_to_col_idx[pId],
+                tId_to_col_idx[qId],
+                ncol,
+                matrix_assembly_dict)
+            if pblock is None:
+                continue
+
+            pblocks.append(pblock)
+            qblocks.append(qblock)
+            wts.append(weights * tilepair_weightfac)
+            rhss.append(rhs)
+
+        chunk = {
+            'zlist': np.array([pair['z1'], pair['z2']]),
+            'block': sparse.vstack(pblocks) - sparse.vstack(qblocks),
+            'weights': np.concatenate(wts),
+            'rhs': np.concatenate(rhss)
+            }
+        chunks.append(chunk)
+
+    func_result["x"], reg = map(list, zip(*(
+        (ts.tforms[-1].to_solve_vec(),
+         ts.tforms[-1].regularization(regularization_dict))
+        for ts in draft_resolvedtiles.tilespecs)))
+
+    if len(func_result['x']) == 0:
+        raise utils.BigFetaException(
+                "no matrix was assembled. Likely scenarios: "
+                "your tilespecs and pointmatches do not key "
+                " to each other in group or tileId. Or, your match "
+                " collection is empty")
+
+    func_result["x"] = np.concatenate(func_result["x"])
+    func_result["reg"] = sparse.diags(
+            [np.concatenate(reg)], [0], format='csr')
+
+    func_result["A"], func_result["weights"], func_result["rhs"], _ = (
+        utils.concatenate_results(np.array(chunks)))
+
+    if results_in_chunks:
+        func_result["A_weights_rhs_z_chunks"] = chunks
+
+    return ((func_result, draft_resolvedtiles)
+            if return_draft_resolvedtiles else func_result)
 
 
 class BigFeta(argschema.ArgSchemaParser):
@@ -406,7 +601,33 @@ class BigFeta(argschema.ArgSchemaParser):
 
         """
         # create A matrix in compressed sparse row (CSR) format
-        CSR_A = self.create_CSR_A(self.resolvedtiles)
+        pairs = utils.determine_zvalue_pairs(
+            self.resolvedtiles,
+            self.args['matrix_assembly']['depth'])
+
+        with concurrent.futures.ThreadPoolExecutor(
+                max_workers=self.args["n_parallel_jobs"]) as e:
+
+            matches_fut = [
+                e.submit(
+                    utils.get_matches,
+                    pair['section1'],
+                    pair['section2'],
+                    self.args['pointmatch'],
+                    utils.make_dbconnection(self.args['pointmatch']))
+                for pair in pairs]
+
+            matches = []
+            for f in concurrent.futures.as_completed(matches_fut):
+                matches += f.result()
+
+        CSR_A = create_CSR_A_fromobjects(
+            self.resolvedtiles, matches, self.args["transformation"],
+            self.args["transform_apply"], self.args["regularization"],
+            self.args["matrix_assembly"], self.args["poly_order"],
+            self.args["fullsize_transform"], copy_resolvedtiles=False,
+            results_in_chunks=(self.args["output_mode"] == "hdf5"))
+        # CSR_A = self.create_CSR_A(self.resolvedtiles)
 
         assemble_result = {}
         assemble_result['A'] = CSR_A.pop('A')
@@ -417,11 +638,30 @@ class BigFeta(argschema.ArgSchemaParser):
 
         # output the regularization vectors to hdf5 file
         if self.args['output_mode'] == 'hdf5':
+            results = np.array(CSR_A["A_weights_rhs_z_chunks"])
+
+            if self.args['hdf5_options']['chunks_per_file'] == -1:
+                proc_chunks = [np.arange(results.size)]
+            else:
+                proc_chunks = np.array_split(
+                    np.arange(results.size),
+                    np.ceil(
+                        results.size /
+                        self.args['hdf5_options']['chunks_per_file']))
+
+            metadata = []
+            for pchunk in proc_chunks:
+                A, w, rhs, z = utils.concatenate_results(results[pchunk])
+                if A is not None:
+                    fname = self.args['hdf5_options']['output_dir'] + \
+                        '/%d_%d.h5' % (z.min(), z.max())
+                    metadata.append(
+                        utils.write_chunk_to_file(fname, A, w.data, rhs))
 
             utils.write_reg_and_tforms(
                 dict(self.args),
                 self.resolvedtiles,
-                CSR_A['metadata'],
+                metadata,
                 assemble_result['x'],
                 assemble_result['reg'])
 
