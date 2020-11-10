@@ -195,33 +195,23 @@ def _filter_to_products(contains_products, iterables_it):
             if all([p[i] in it for i, it in enumerate(iterables_it)])]
 
 
-def create_CSR_A_fromobjects(
-        resolvedtiles, matches, transform_name,
-        transform_apply, regularization_dict, matrix_assembly_dict,
-        order=2, fullsize=False,
-        return_draft_resolvedtiles=False, copy_resolvedtiles=True,
-        results_in_chunks=False):
-    """Assembles results as in BigFeta.create_CSR_A from
-        resolvedtiles and pointmatches
+def create_CSR_A_fromprepared(resolvedtiles, matches, regularization_dict,
+                              matrix_assembly_dict, transform_apply=[],
+                              return_draft_resolvedtiles=False,
+                              copy_resolvedtiles=True,
+                              results_in_chunks=False):
+    """Assembles results as in BigFeta.create_CSR_A from prepared resolvedtiles
 
     Parameters
     ----------
     resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
-        resolvedtiles object containing tiles to consider during assembly
+        resolvedtiles object containing which end in an AlignerTransform
     matches : list of dict
         pointmatches in render format
-    transform_name : string
-        string describing model for which to solve (see Schema)
-    transform_apply : list of int
-        additional transforms to apply to pointmatches
     regularization_dict : dict
         regularization parameters (see Schema)
     matrix_assembly_dict : dict
         matrix assembly parameters (see Schema)
-    order : int
-        order for polynomial transform
-    fullsize : boolean
-        whether to use fullsize matrices
     return_draft_resolvedtiles : boolean
         whether to return draft_resolvedtiles -- used to apply transforms
     copy_resolvedtiles : boolean
@@ -237,16 +227,11 @@ def create_CSR_A_fromobjects(
     draft_resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
         resolvedtiles object with AlignerTransforms used to derive result
     """
-
     func_result = {}
 
     draft_resolvedtiles = (
-        copy.deepcopy(resolvedtiles) if copy_resolvedtiles else resolvedtiles)
-
-    utils.ready_transforms(
-        draft_resolvedtiles.tilespecs, transform_name,
-        fullsize, order)
-
+        copy.deepcopy(resolvedtiles) if copy_resolvedtiles
+        else resolvedtiles)
     # this emulates the pre_load behavior of the schema
     depth = (
         matrix_assembly_dict["depth"] if isinstance(
@@ -365,6 +350,62 @@ def create_CSR_A_fromobjects(
 
     return ((func_result, draft_resolvedtiles)
             if return_draft_resolvedtiles else func_result)
+
+
+def create_CSR_A_fromobjects(
+        resolvedtiles, matches, transform_name,
+        transform_apply, regularization_dict, matrix_assembly_dict,
+        order=2, fullsize=False,
+        return_draft_resolvedtiles=False, copy_resolvedtiles=True,
+        results_in_chunks=False):
+    """Assembles results as in BigFeta.create_CSR_A from
+        resolvedtiles and pointmatches
+
+    Parameters
+    ----------
+    resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
+        resolvedtiles object containing tiles to consider during assembly
+    matches : list of dict
+        pointmatches in render format
+    transform_name : string
+        string describing model for which to solve (see Schema)
+    transform_apply : list of int
+        additional transforms to apply to pointmatches
+    regularization_dict : dict
+        regularization parameters (see Schema)
+    matrix_assembly_dict : dict
+        matrix assembly parameters (see Schema)
+    order : int
+        order for polynomial transform
+    fullsize : boolean
+        whether to use fullsize matrices
+    return_draft_resolvedtiles : boolean
+        whether to return draft_resolvedtiles -- used to apply transforms
+    copy_resolvedtiles : boolean
+        whether to make copy of the input resolvedtiles or process in place
+    results_in_chunks : boolean
+        whether to return another dicitonary item "A_weights_rhs_z_chunks"
+        with chunked results (for writing to hdf5)
+
+    Returns
+    -------
+    func_result : dict
+        dictionary with keys "x", "reg", "A", "weights", "rhs"
+    draft_resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
+        resolvedtiles object with AlignerTransforms used to derive result
+    """
+    draft_resolvedtiles = (
+        copy.deepcopy(resolvedtiles) if copy_resolvedtiles else resolvedtiles)
+
+    utils.ready_transforms(
+        draft_resolvedtiles.tilespecs, transform_name,
+        fullsize, order)
+
+    return create_CSR_A_fromprepared(
+        draft_resolvedtiles, matches, regularization_dict,
+        matrix_assembly_dict, transform_apply=transform_apply,
+        return_draft_resolvedtiles=return_draft_resolvedtiles,
+        copy_resolvedtiles=False, results_in_chunks=results_in_chunks)
 
 
 class BigFeta(argschema.ArgSchemaParser):
