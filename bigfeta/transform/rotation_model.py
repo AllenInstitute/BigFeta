@@ -154,9 +154,6 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
         qcm = qpts - qpts.mean(axis=0)
 
         # points very close to center of mass are noisy
-        # rfilter = np.argwhere(
-        #         (np.linalg.norm(pcm, axis=1) > 15) &
-        #         (np.linalg.norm(qcm, axis=1) > 15)).flatten()
         rfilter = ((np.linalg.norm(pcm, axis=1) > 15) &
                    (np.linalg.norm(qcm, axis=1) > 15))
         pcm = pcm[rfilter]
@@ -166,7 +163,6 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
         pangs = np.arctan2(pcm[:, 1], pcm[:, 0])
 
         # rotate all the q values relative to p
-        # ams = block_diag(*[aff_matrix(-i) for i in pangs])
         ams = block_diag(*aff_matrices(-1. * pangs))
         qrot = ams.dot(qcm.flatten()).reshape(-1, 2)
 
