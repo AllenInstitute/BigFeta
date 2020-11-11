@@ -11,12 +11,37 @@ except ImportError:
 
 
 def petsc_mtx_from_scipycsr(m):
+    """construct a petsc matrix object from a scipy CSR sparse martrix
+
+    Parameters
+    ----------
+    m : :class:`scipy.sparse.csr_matrix`
+        a matrix to represent in petsc
+
+    Returns
+    -------
+    M : :class:`petsc4py.PETSc.Mat`
+      petsc4py representation of matrix m
+    """
     return petsc4py.PETSc.Mat().createAIJ(
         size=m.shape, csr=(
             m.indptr, m.indices, m.data))
 
 
-def petsc_factorize(m):
+def petsc_factorize(A):
+    """return petsc ksp for solving sparse linear system,
+    with A pre-factorized
+
+    Parameters
+    ----------
+    A : :class:`petsc4py.PETSc.Mat`
+        input matrix
+
+    Returns
+    -------
+    ksp : :class:`petsc.PETSc.KSP`
+        KSP for solving
+    """
     pc = petsc4py.PETSc.PC().create()
     pc.setType("lu")
     # pc.setFactorSolverType("pastix")
@@ -26,17 +51,46 @@ def petsc_factorize(m):
     ksp.setType("preonly")
 
     ksp.setFromOptions()
-    ksp.setOperators(m)
+    ksp.setOperators(A)
 
     return ksp
 
 
-def petsc_factorize_scipycsr(m):
-    m_petsc = petsc_mtx_from_scipycsr(m)
-    return petsc_factorize(m_petsc)
+def petsc_factorize_scipycsr(A):
+    """get petsc4py ksp from a scipy sparse CSR
+
+    Parameters
+    ----------
+    A : :class:`scipy.sparse.csr_matrix`
+        input matrix to factorize
+
+    Returns
+    -------
+    ksp : :class:`petsc.PETSc.KSP`
+        KSP for solving
+    """
+    A_petsc = petsc_mtx_from_scipycsr(A)
+    return petsc_factorize(A_petsc)
 
 
 def petsc_solve_to_numpy(s, b, x):
+    """solve system with numpy array b and x using petsc4py ksp
+
+    Parameters
+    ----------
+    s : :class:`petsc.PETSc.KSP`
+        KSP for solving
+    b : :class:`numpy.ndarray`
+        b for Ax=b solve
+    x : :class:`numpy.ndarray`
+        x for Ax=b solve
+
+    Returns
+    -------
+    x : :class:`numpy.ndarray`
+        numpy representation of solution
+
+    """
     b_petsc = petsc4py.PETSc.Vec().createWithArray(b)
     x_petsc = petsc4py.PETSc.Vec().createWithArray(x)
     s.solve(b_petsc, x_petsc)
@@ -44,6 +98,28 @@ def petsc_solve_to_numpy(s, b, x):
 
 
 def solve_petsc_factorization(A, weights, reg, x0, rhs):
+    """regularized, weighted linear least squares solve
+    using petsc factorization
+
+    Parameters
+    ----------
+    A : :class:`scipy.sparse.csr_matrix`
+        the matrix, N (equations) x M (degrees of freedom)
+    weights : :class:`scipy.sparse.csr_matrix`
+        N x N diagonal matrix containing weights
+    reg : :class:`scipy.sparse.csr_matrix`
+        M x M diagonal matrix containing regularizations
+    x0 : :class:`numpy.ndarray`
+        M x nsolve float constraint values for the DOFs
+    rhs : :class:`numpy.ndarray`
+        rhs vector(s)
+        N x nsolve float right-hand-side(s)
+
+    Returns
+    -------
+    results : dict
+       includes solution "x" and summary metrics
+    """
     time0 = time.time()
 
     weights.data = np.sqrt(weights.data)

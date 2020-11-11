@@ -1,4 +1,5 @@
 import pytest
+import itertools
 import renderapi
 from test_data import (render_params,
                        montage_raw_tilespecs_json,
@@ -306,3 +307,42 @@ def test_run_resolvedtiles(resolvedtiles_obj, matches_obj):
 
     assert np.all(np.array(sol['precision']) < 1e-7)
     assert np.all(np.array(sol['error']) < 200)
+
+
+@pytest.mark.parametrize(
+    "transform, fullsize, order",
+    [("AffineModel", True, 0),
+     ("AffineModel", False, 0),
+     ("SimilarityModel", False, 0),
+     ("Polynomial2DTransform", False, 0),
+     ("Polynomial2DTransform", False, 1)])
+def test_different_solvers(resolvedtiles_obj, matches_obj,
+                           transform, fullsize, order):
+    solve_funcs = [v for k, v in solve.solve_funcs.items() if k != "default"]
+    p = copy.deepcopy(montage_parameters)
+    p['transformation'] = transform
+    p['fullsize'] = fullsize
+    p['poly_order'] = order
+    p["regularization"]["poly_factors"] = None
+
+    solve_results = []
+    for solve_func in solve_funcs:
+        copied_rts = copy.deepcopy(resolvedtiles_obj)
+        copied_matches = copy.deepcopy(matches_obj)
+        rts = renderapi.resolvedtiles.ResolvedTiles(
+            tilespecs=[ts for ts in copied_rts.tilespecs
+                       if p["first_section"] <= ts.z <= p["last_section"]],
+            transformList=copied_rts.transforms)
+
+        fr, draft_rts = bigfeta.create_CSR_A_fromobjects(
+            rts, copied_matches, p["transformation"],
+            [],  # default empty transform_apply
+            p["regularization"], p["matrix_assembly"],
+            return_draft_resolvedtiles=True)
+
+        sol = solve_func(
+            fr["A"], fr["weights"], fr["reg"], fr["x"], fr["rhs"])
+
+        solve_results.append(sol)
+    for sol1, sol2 in itertools.combinations(solve_results, 2):
+        assert np.allclose(sol1["x"], sol2["x"], rtol=1e-4)
