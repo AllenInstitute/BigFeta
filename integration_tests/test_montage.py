@@ -4,6 +4,7 @@ from test_data import (render_params,
                        montage_raw_tilespecs_json,
                        montage_parameters)
 from bigfeta import bigfeta
+from bigfeta import solve
 import json
 from marshmallow.exceptions import ValidationError
 import copy
@@ -300,7 +301,7 @@ def test_run_resolvedtiles(resolvedtiles_obj, matches_obj):
         p["regularization"], p["matrix_assembly"],
         return_draft_resolvedtiles=True)
 
-    sol = bigfeta.utils.solve(
+    sol = solve.solve(
         fr["A"], fr["weights"], fr["reg"], fr["x"], fr["rhs"])
 
     assert np.all(np.array(sol['precision']) < 1e-7)

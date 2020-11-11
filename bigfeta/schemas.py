@@ -337,6 +337,11 @@ class BigFetaSchema(ArgSchema):
             description=("tilespec.tforms[i].tform() for i in transform_apply "
                          "will be performed on the matches before matrix "
                          "assembly."))
+    solve_implementation = String(
+        required=False, default="default", missing="default",
+        validator=mm.validate.OneOf(["petsc", "python", "default"]),
+        description=(
+            "solve type to use: petsc, python, or default to one of the two"))
 
     @mm.post_load
     def validate_data(self, data):
