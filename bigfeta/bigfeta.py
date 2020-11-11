@@ -205,7 +205,7 @@ def create_CSR_A_fromprepared(resolvedtiles, matches, regularization_dict,
     Parameters
     ----------
     resolvedtiles : renderapi.resolvedtiles.ResolvedTiles
-        resolvedtiles object containing which end in an AlignerTransform
+        resolvedtiles object containing tilespecs with transforms ending in an AlignerTransform
     matches : list of dict
         pointmatches in render format
     regularization_dict : dict
