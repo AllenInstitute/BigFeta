@@ -1,11 +1,11 @@
 language: python
 dist: xenial
 python:
+# we don't actually use travis python versions, so match these to conda
 - '2.7'
 - '3.5'
 - '3.6'
-- 3.6-dev
-- 3.7-dev
+- '3.7'
 services:
 - docker
 addons:
@@ -24,10 +24,26 @@ addons:
     - libseccomp-dev
     - wget
     - pkg-config
+    - libopenmpi-dev
 install:
+# create and activate conda environment for testing
+- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+  else
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  fi
+- bash miniconda.sh -b -p $HOME/miniconda
+- source "$HOME/miniconda/etc/profile.d/conda.sh"
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- conda update -q conda
+- conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
+- conda activate test-environment
+
 - pip install codecov
 - pip install -r requirements.txt
 - pip install -r test_requirements.txt
+- conda install -c conda-forge petsc4py
 - mkdir -p \tmp\solver_output
 before_install:
 - docker-compose up -d
