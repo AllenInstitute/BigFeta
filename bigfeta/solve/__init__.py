@@ -1,4 +1,4 @@
-from . import solve_python
+from . import solve_scipy
 from . import solve_petsc
 
 # import bigfeta.solve.solve_petsc
@@ -6,7 +6,7 @@ from . import solve_petsc
 # uses petsc if available.  Can set default solve by modifying this.
 default_solve = (solve_petsc.solve
                  if solve_petsc.HAS_PETSC
-                 else solve_python.solve)
+                 else solve_scipy.solve)
 
 
 def solve(*args, **kwargs):
@@ -17,7 +17,7 @@ def solve(*args, **kwargs):
 
 solve_funcs = {
     "petsc": solve_petsc.solve,
-    "python": solve_python.solve,
+    "scipy": solve_scipy.solve,
     "default": default_solve
 }
 
