@@ -6,6 +6,7 @@ import argschema
 from .schemas import BigFetaSchema
 from . import utils
 from . import jsongz
+from . import solve
 import time
 import scipy.sparse as sparse
 from scipy.sparse import csr_matrix
@@ -843,7 +844,9 @@ class BigFeta(argschema.ArgSchemaParser):
             message = message.replace(' hdf5 ', ' none ')
             results = None
         else:
-            results = utils.solve(A, weights, reg, x0, rhs)
+            solve_func = solve.solve_funcs[
+                self.args.get("solve_implementation", "default")]
+            results = solve_func(A, weights, reg, x0, rhs)
             message = utils.message_from_solve_results(results)
 
         return message, results
