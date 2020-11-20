@@ -2,7 +2,7 @@ import renderapi
 import numpy as np
 from scipy.sparse import csr_matrix
 from scipy.linalg import block_diag
-from .utils import aff_matrix, AlignerTransformException
+from .utils import aff_matrix, aff_matrices, AlignerTransformException
 __all__ = ['AlignerRotationModel']
 
 
@@ -121,11 +121,12 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
         return block, w, rhs
 
     @staticmethod
-    def preprocess(ppts, qpts, w):
+    def preprocess(ppts, qpts, w, npts_max=None, choose_random=True,
+                   cutoff_distance=15):
         """tilepair-level preprocessing step for rotation transform.
-           derives the relative center-of-mass angles between all 
+           derives the relative center-of-mass angles between all
            p's and q's to avoid angular discontinuity. Will filter
-           out points very close to center-of-mass. 
+           out points very close to center-of-mass.
            Tilepairs with relative rotations near 180deg will not avoid
            the discontinuity.
 
@@ -137,6 +138,13 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
             N x 2. The q tile correspondence coordinates
         w : :class:`numpy.ndarray`
             size N. The weights.
+        npts_max : int
+            maximum points to include after processing
+        choose_random : bool
+            whether to randomly reduce the input points to npts_max
+        cutoff_distance : float
+            distance from center of mass of each point cloud in which to
+            exclude points
 
         Returns
         -------
@@ -155,8 +163,15 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
 
         # points very close to center of mass are noisy
         rfilter = np.argwhere(
-                (np.linalg.norm(pcm, axis=1) > 15) &
-                (np.linalg.norm(qcm, axis=1) > 15)).flatten()
+            (np.linalg.norm(pcm, axis=1) > cutoff_distance) &
+            (np.linalg.norm(qcm, axis=1) > cutoff_distance)).flatten()
+        if npts_max is not None:
+            if choose_random:
+                rfilter = np.random.choice(
+                    rfilter, max(npts_max, rfilter.size), replace=False)
+            else:
+                rfilter = rfilter[:npts_max]
+
         pcm = pcm[rfilter]
         qcm = qcm[rfilter]
         w = w[rfilter]
@@ -164,8 +179,8 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
         pangs = np.arctan2(pcm[:, 1], pcm[:, 0])
 
         # rotate all the q values relative to p
-        ams = block_diag(*[aff_matrix(-i) for i in pangs])
-        qrot = ams.dot(qcm.flatten()).reshape(-1, 2)
+        mtxs = aff_matrices(-1. * pangs)
+        qrot = np.einsum("ijk,ik->ij", mtxs, qcm)
 
         delta_angs = np.arctan2(qrot[:, 1], qrot[:, 0])
 

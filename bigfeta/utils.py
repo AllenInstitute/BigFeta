@@ -776,7 +776,6 @@ def blocks_from_tilespec_pair(
     if not any(match["matches"]["w"]):
         return None, None, None, None
 
-
     if len(match['matches']['w']) < matrix_assembly['npts_min']:
         return None, None, None, None
 
@@ -785,7 +784,9 @@ def blocks_from_tilespec_pair(
     w = np.array(match['matches']['w'])
 
     if isinstance(ptspec.tforms[-1], AlignerRotationModel):
-        ppts, qpts, w = AlignerRotationModel.preprocess(ppts, qpts, w)
+        ppts, qpts, w = AlignerRotationModel.preprocess(
+            ppts, qpts, w, matrix_assembly['npts_max'],
+            matrix_assembly['choose_random'])
 
     if ppts.shape[0] > matrix_assembly['npts_max']:
         if matrix_assembly['choose_random']:

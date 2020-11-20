@@ -32,3 +32,19 @@ def aff_matrix(theta, offs=None):
     M[0, 2] = offs[0]
     M[1, 2] = offs[1]
     return M
+
+
+def aff_matrices(thetas, offs=None):
+    """affine matrices from thetas
+    """
+    c, s = np.cos(thetas), np.sin(thetas)
+    matrices = np.zeros((len(thetas), 3, 3))
+
+    matrices[:, 0, 0] = c
+    matrices[:, 0, 1] = -s
+    matrices[:, 1, 0] = s
+    matrices[:, 1, 1] = c
+    if offs is None:
+        return matrices[:, :-1, :-1]
+    matrices[:, :, -1] = np.insert(offs, offs.shape[1], 1, 1)
+    return matrices
