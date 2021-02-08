@@ -3,9 +3,9 @@ dist: xenial
 python:
 # we don't actually use travis python versions, so match these to conda
 - '2.7'
-- '3.5'
 - '3.6'
 - '3.7'
+- '3.8'
 services:
 - docker
 addons:
