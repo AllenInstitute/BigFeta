@@ -319,6 +319,15 @@ def create_CSR_A_fromprepared(resolvedtiles, matches, regularization_dict,
             wts.append(weights * tilepair_weightfac)
             rhss.append(rhs)
 
+        # some use cases will not poduce blocks
+        if not pblocks:
+            logger.debug(
+                "cannot assemble matrix block "
+                "for pointmatch groupIds: {} and {}".format(
+                    pair["section1"], pair["section2"]
+                ))
+            continue
+
         chunk = {
             'zlist': np.array([pair['z1'], pair['z2']]),
             'block': sparse.vstack(pblocks) - sparse.vstack(qblocks),
@@ -669,7 +678,6 @@ class BigFeta(argschema.ArgSchemaParser):
             self.args["matrix_assembly"], self.args["poly_order"],
             self.args["fullsize_transform"], copy_resolvedtiles=False,
             results_in_chunks=(self.args["output_mode"] == "hdf5"))
-        # CSR_A = self.create_CSR_A(self.resolvedtiles)
 
         assemble_result = {}
         assemble_result['A'] = CSR_A.pop('A')
@@ -709,7 +717,7 @@ class BigFeta(argschema.ArgSchemaParser):
 
         return assemble_result
 
-    def create_CSR_A(self, resolved):
+    def create_CSR_A(self, resolved):  # pragma: no cover
         """distributes the work of reading pointmatches and
            assembling results
 
@@ -719,6 +727,10 @@ class BigFeta(argschema.ArgSchemaParser):
             resolved tiles object from which to create A matrix
 
         """
+        warnings.warn(
+            ("create_CSR_A is deprecated.  Use create_CSR_A_fromobjects "
+             "or create_CRS_A_fromprepared."),
+            DeprecationWarning, stacklevel=2)
 
         func_result = {
             'A': None,

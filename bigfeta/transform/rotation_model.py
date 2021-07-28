@@ -168,7 +168,7 @@ class AlignerRotationModel(renderapi.transform.AffineModel):
         if npts_max is not None:
             if choose_random:
                 rfilter = np.random.choice(
-                    rfilter, max(npts_max, rfilter.size), replace=False)
+                    rfilter, min(npts_max, rfilter.size), replace=False)
             else:
                 rfilter = rfilter[:npts_max]
 
