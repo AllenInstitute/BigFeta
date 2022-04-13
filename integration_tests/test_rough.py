@@ -252,16 +252,19 @@ def test_rough_similarity_2(
     del mod
 
 
+@pytest.mark.parametrize("choose_random", [True, False])
 def test_rough_rotation(
         render,
         rough_pointmatches,
         rough_input_stack,
-        output_stack_name):
+        output_stack_name,
+        choose_random):
     rough_parameters2 = copy.deepcopy(rough_parameters)
     rough_parameters2['input_stack']['name'] = rough_input_stack
     rough_parameters2['output_stack']['name'] = output_stack_name
     rough_parameters2['pointmatch']['name'] = rough_pointmatches
     rough_parameters2['transformation'] = 'RotationModel'
+    rough_parameters2["matrix_assembly"]["choose_random"] = choose_random
     mod = bigfeta.BigFeta(
             input_data=copy.deepcopy(rough_parameters2), args=[])
     mod.run()

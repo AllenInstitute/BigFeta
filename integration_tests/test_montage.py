@@ -345,4 +345,4 @@ def test_different_solvers(resolvedtiles_obj, matches_obj,
 
         solve_results.append(sol)
     for sol1, sol2 in itertools.combinations(solve_results, 2):
-        assert np.allclose(sol1["x"], sol2["x"], rtol=1e-4)
+        assert np.allclose(sol1["x"], sol2["x"], rtol=5e-4)
