@@ -1,4 +1,5 @@
 import collections
+import copy
 from functools import partial
 import itertools
 import json
@@ -892,3 +893,15 @@ def transform_match(match, ptspec, qtspec, apply_list, tforms):
                 raise
             match['matches'][pq] = dst.transpose().tolist()
     return match
+
+
+# TODO fast copy resolvedtiles
+def copy_resolvedtiles(resolvedtiles):
+    return copy.deepcopy(resolvedtiles)
+
+
+def tilespecs_regularization_from_reg_d(tilespecs, reg_d):
+    return scipy.sparse.diags(
+        [numpy.concatenate(
+            [ts.tforms[-1].regularization(reg_d) for ts in tilespecs])],
+        [0], format="csr")
