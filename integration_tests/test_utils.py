@@ -72,7 +72,7 @@ def test_sparse_block(matches, tilespecs):
         for block, nd, nc in zip(
                 [pblock, qblock], [pndof, qndof], [pcol, qcol]):
             i, j, v = scipy.sparse.find(block)
-            assert np.all(np.in1d(j, nc + np.arange(nd)))
+            assert np.all(np.isin(j, nc + np.arange(nd)))
 
 
 @pytest.mark.parametrize('random', [True, False])
@@ -141,4 +141,4 @@ def test_sparse_npts(matches, tilespecs, random):
         for block, nd, nc in zip(
                 [pblock, qblock], [pndof, qndof], [pcol, qcol]):
             i, j, v = scipy.sparse.find(block)
-            assert np.all(np.in1d(j, nc + np.arange(nd)))
+            assert np.all(np.isin(j, nc + np.arange(nd)))

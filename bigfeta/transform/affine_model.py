@@ -84,6 +84,7 @@ class AlignerAffineModel(renderapi.transform.AffineModel):
         vsh = vec.shape
         if vsh[1] == 1:
             # fullsize
+            vec = vec.reshape(vec.shape[0])
             self.M[0, 0] = vec[0]
             self.M[0, 1] = vec[1]
             self.M[0, 2] = vec[2]

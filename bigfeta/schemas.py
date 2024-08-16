@@ -336,7 +336,9 @@ class BigFetaSchema(ArgSchema):
             missing=[],
             description=("tilespec.tforms[i].tform() for i in transform_apply "
                          "will be performed on the matches before matrix "
-                         "assembly."))
+                         "assembly."),
+            cli_as_single_argument=True
+    )
     solve_implementation = String(
         required=False, default="default", missing="default",
         validator=mm.validate.OneOf(["petsc", "scipy", "default"]),

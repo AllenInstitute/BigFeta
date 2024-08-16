@@ -65,6 +65,7 @@ class AlignerSimilarityModel(renderapi.transform.AffineModel):
             number of rows read from vec. Used to increment vec slice
             for next transform
         """
+        vec = vec.reshape(vec.shape[0])
         self.M[0, 0] = vec[0]
         self.M[0, 1] = vec[1]
         self.M[0, 2] = vec[2]
