@@ -12,3 +12,6 @@ docs/_build/
 htmlcov/
 .cache
 .tox
+# pixi environments
+.pixi
+*.egg-info
