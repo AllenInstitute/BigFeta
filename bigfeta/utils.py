@@ -902,6 +902,6 @@ def copy_resolvedtiles(resolvedtiles):
 
 def tilespecs_regularization_from_reg_d(tilespecs, reg_d):
     return sparse.diags(
-        [numpy.concatenate(
+        [np.concatenate(
             [ts.tforms[-1].regularization(reg_d) for ts in tilespecs])],
         [0], format="csr")
