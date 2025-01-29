@@ -32,6 +32,10 @@ test = [
     "pylint>=1.5.4",
     "jinja2",
 ]
+pypi-build = [
+    "build",
+    "twine"
+]
 
 [build-system]
 requires = ["setuptools>=64", "setuptools_scm>=8"]
@@ -81,6 +85,7 @@ py310-conda = ["py310", "pixi-base"]
 py310-conda-test = ["py310", "pixi-base", "test"]
 py311-conda = ["py311", "pixi-base"]
 py311-conda-test = ["py311", "pixi-base", "test"]
+py311-build = ["py311", "pypi-build"]
 
 [tool.coverage.run]
 omit = ["integration_tests/*"]
@@ -88,3 +93,7 @@ omit = ["integration_tests/*"]
 [tool.pixi.feature.test.tasks]
 test = "pytest  --cov --cov-report=xml --junitxml=test-reports/test.xml"
 
+[tool.pixi.feature.pypi-build.tasks]
+pypi-build = "python -m build"
+pypi-test-upload = "python -m twine upload --repository testpypi dist/*"
+pypi-test-deploy = "python -m build && python -m twine upload --repository testpypi dist/*"
