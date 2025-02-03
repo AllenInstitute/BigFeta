@@ -72,7 +72,8 @@ def filter_solvestats(solvestats, associated_values=None,
                       mad_target=(0.003, 0.003), mad_cutoff=(0.005, 0.007),
                       mad_step_size=(0.001, 0.001),
                       scalemin_cutoff=(0, 0),
-                      min_inliers=1, max_inliers=None):
+                      min_inliers=1, max_inliers=None,
+                      scaled_error_cutoff=None):
     associated_values = (
         itertools.repeat(None)
         if associated_values is None
@@ -92,12 +93,15 @@ def filter_solvestats(solvestats, associated_values=None,
             if (
                     ss.scale_mads[0] <= tgt[0] and
                     ss.scale_mads[1] <= tgt[1]):
-                # err_param = numpy.linalg.norm(ss.error / ss.scale_mean)
+                err_param = numpy.linalg.norm(ss.error / ss.scale_mean)
                 scale_param = numpy.linalg.norm(ss.scale_mean)
                 if 1.4 < scale_param:  # TODO unnecessary
                     if (
                             scalemin_cutoff[0] < ss.scale_mins[0] and
                             scalemin_cutoff[1] < ss.scale_mins[1]):
+                        if scaled_error_cutoff is not None:
+                            if err_param > scaled_error_cutoff:
+                                continue
                         inliers.append((ss, ss_values))
         if len(inliers) >= min_inliers:
             # return sorted with minimum residual first
