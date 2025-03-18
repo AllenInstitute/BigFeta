@@ -1,21 +1,24 @@
 import copy
 import concurrent.futures
+import json
+import logging
+import os
+import sys
+import time
+import warnings
+
+import argschema
+import h5py
 import numpy as np
 import renderapi
-import argschema
+import scipy.sparse as sparse
+from scipy.sparse import csr_matrix
+
 from .schemas import BigFetaSchema
 from . import utils
 from . import jsongz
 from . import solve
-import time
-import scipy.sparse as sparse
-from scipy.sparse import csr_matrix
-import warnings
-import os
-import sys
-import logging
-import json
-import h5py
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.resetwarnings()
 

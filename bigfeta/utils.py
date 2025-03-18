@@ -1,22 +1,28 @@
-from pymongo import MongoClient
-import numpy as np
-import renderapi
-from renderapi.external.processpools import pool_pathos
+import collections
+import copy
+from functools import partial
+import itertools
+import json
 import logging
+import os
+import subprocess
+import sys
 import time
 import warnings
-import os
-import sys
-import json
-from functools import partial
+
+import h5py
+import numpy as np
+import requests
 import scipy.sparse as sparse
+
+from pymongo import MongoClient
+
+import renderapi
+from renderapi.external.processpools import pool_pathos
+
 from .transform.transform import AlignerTransform, AlignerRotationModel
 from . import jsongz
-import collections
-import itertools
-import subprocess
-import requests
-import h5py
+
 
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
@@ -887,3 +893,15 @@ def transform_match(match, ptspec, qtspec, apply_list, tforms):
                 raise
             match['matches'][pq] = dst.transpose().tolist()
     return match
+
+
+# TODO fast copy resolvedtiles
+def copy_resolvedtiles(resolvedtiles):
+    return copy.deepcopy(resolvedtiles)
+
+
+def tilespecs_regularization_from_reg_d(tilespecs, reg_d):
+    return sparse.diags(
+        [np.concatenate(
+            [ts.tforms[-1].regularization(reg_d) for ts in tilespecs])],
+        [0], format="csr")
