@@ -12,6 +12,8 @@ import copy
 import os
 import numpy as np
 
+from bigfeta.solve_tools import regularization_sweep
+
 dname = os.path.dirname(os.path.abspath(__file__))
 FILE_PMS = os.path.join(
         dname, 'test_files', 'montage_pointmatches.json')
@@ -346,3 +348,116 @@ def test_different_solvers(resolvedtiles_obj, matches_obj,
         solve_results.append(sol)
     for sol1, sol2 in itertools.combinations(solve_results, 2):
         assert np.allclose(sol1["x"], sol2["x"], rtol=5e-4)
+
+
+def test_affine_sweep(resolvedtiles_obj, matches_obj):
+    p = copy.deepcopy(montage_parameters)
+
+    rts = renderapi.resolvedtiles.ResolvedTiles(
+        tilespecs=[ts for ts in resolvedtiles_obj.tilespecs
+                   if p["first_section"] <= ts.z <= p["last_section"]],
+        transformList=resolvedtiles_obj.transforms)
+
+    solver_results = regularization_sweep.sweep_parameters(
+        rts, matches_obj, p["transformation"],
+        [],  # default empty transform_apply
+        p["regularization"], p["matrix_assembly"],
+        processes=2,
+        params_iter=[(
+            p["regularization"]["default_lambda"],
+            p["regularization"]["translation_factor"]
+        )])
+    sol = solver_results[0].solution_dict
+
+    assert np.all(np.array(sol['precision']) < 1e-7)
+    assert np.all(np.array(sol['error']) < 200)
+
+
+def test_affine_sweep_logarithmic(resolvedtiles_obj, matches_obj):
+    p = copy.deepcopy(montage_parameters)
+
+    rts = renderapi.resolvedtiles.ResolvedTiles(
+        tilespecs=[ts for ts in resolvedtiles_obj.tilespecs
+                   if p["first_section"] <= ts.z <= p["last_section"]],
+        transformList=resolvedtiles_obj.transforms)
+
+    solver_results = regularization_sweep.sweep_parameters_logarithmic(
+        rts, matches_obj, p["transformation"],
+        [],  # default empty transform_apply
+        p["regularization"], p["matrix_assembly"],
+        processes=4,
+        lambda_log_range=(-1, 8),
+        num_lambda=2,
+        transfac_log_range=(-7, -3),
+        num_transfac=2)
+
+    assert len(solver_results) == 4
+
+
+def test_filter_solvestats():
+    good_solvestat = regularization_sweep.SolveStats(
+        scale_mean=np.array((1, 1)),
+        scale_median=np.array((1, 1)),
+        scale_mins=np.array((1, 1)),
+        scale_maxs=np.array((1, 1)),
+        scale_stdevs=np.array((0, 0)),
+        scale_mads=np.array((0, 0)),
+        err_means=np.array((0, 0)),
+        err_stds=np.array((0, 0)),
+        error=np.array((0, 0)),
+    )
+
+    bad_solvestat_mad = regularization_sweep.SolveStats(
+        scale_mean=good_solvestat.scale_mean,
+        scale_median=good_solvestat.scale_median,
+        scale_mins=good_solvestat.scale_mins,
+        scale_maxs=good_solvestat.scale_maxs,
+        scale_stdevs=good_solvestat.scale_stdevs,
+        scale_mads=np.array((0.1, 0.2)),
+        err_means=good_solvestat.err_means,
+        err_stds=good_solvestat.err_stds,
+        error=good_solvestat.error
+    )
+
+    bad_solvestat_error = regularization_sweep.SolveStats(
+        scale_mean=good_solvestat.scale_mean,
+        scale_median=good_solvestat.scale_median,
+        scale_mins=good_solvestat.scale_mins,
+        scale_maxs=good_solvestat.scale_maxs,
+        scale_stdevs=good_solvestat.scale_stdevs,
+        scale_mads=good_solvestat.scale_mads,
+        err_means=good_solvestat.err_means,
+        err_stds=good_solvestat.err_stds,
+        error=np.array((1000, 1000))
+    )
+
+    filtered_stats = regularization_sweep.filter_solvestats(
+        [
+            good_solvestat,
+            bad_solvestat_error,
+            bad_solvestat_mad
+        ],
+        mad_target=(0.003, 0.003),
+        mad_cutoff=(0.005, 0.007),
+        mad_step_size=(0.001, 0.001),
+        scalemin_cutoff=(0, 0),
+        min_inliers=1,
+        scaled_error_cutoff=4
+    )
+
+    assert len(filtered_stats) == 1
+
+    filtered_stats = regularization_sweep.filter_solvestats(
+        [
+            bad_solvestat_error,
+            bad_solvestat_mad
+        ],
+        mad_target=(0.003, 0.003),
+        mad_cutoff=(0.005, 0.007),
+        mad_step_size=(0.001, 0.001),
+        scalemin_cutoff=(0, 0),
+        min_inliers=1,
+        scaled_error_cutoff=4
+    )
+
+    assert not filtered_stats
