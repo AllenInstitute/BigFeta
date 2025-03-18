@@ -70,22 +70,11 @@ matplotlib = "*"
 fast-histogram = "*"
 petsc4py = "*"
 
-# version-specific python features
-[tool.pixi.feature.py310.dependencies]
-python = "3.10.*"
-[tool.pixi.feature.py311.dependencies]
-python = "3.11.*"
-
 [tool.pixi.environments]
-py310 = ["py310"]
-py310-test = ["py310", "test"]
-py311 = ["py311"]
-py311-test = ["py311", "test"]
-py310-conda = ["py310", "pixi-base"]
-py310-conda-test = ["py310", "pixi-base", "test"]
-py311-conda = ["py311", "pixi-base"]
-py311-conda-test = ["py311", "pixi-base", "test"]
-py311-build = ["py311", "pypi-build"]
+test = ["test"]
+conda = ["pixi-base"]
+conda-test = ["pixi-base", "test"]
+build = ["pypi-build"]
 
 [tool.coverage.run]
 omit = ["integration_tests/*"]
