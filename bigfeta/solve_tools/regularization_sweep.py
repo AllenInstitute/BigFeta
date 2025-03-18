@@ -37,6 +37,26 @@ class ParameterResult:
 
 
 def solve_with_regd_for_parameter_result(draft_resolvedtiles, fr, reg_d):
+    """solve a constructed system with a new regularization dictionary
+        and return a ParameterResult describing result and calculated
+        statistics 
+
+    Parameters
+    ----------
+    draft_resolvedtiles: renderapi.resolvedtiles.ResolvedTiles
+      resolvedtiles ending in an AlignerTransform copied to represent
+      result tiles
+    fr: tuple
+      matrix construction result from bigfeta.bigfeta.create_CSR_A
+    reg_d: dict
+      regularization dict as used in matrix assembly to overwrite the one
+      initially provided by fr
+
+    Returns
+    -------
+    parameter_result: ParameterResult
+      result and calculated statistics of solve with regularization dict
+    """
     l_output_rts = bigfeta.utils.copy_resolvedtiles(draft_resolvedtiles)
     l_reg = bigfeta.utils.tilespecs_regularization_from_reg_d(
         l_output_rts.tilespecs, reg_d)
@@ -74,6 +94,50 @@ def filter_solvestats(solvestats, associated_values=None,
                       scalemin_cutoff=(0, 0),
                       min_inliers=1, max_inliers=None,
                       scaled_error_cutoff=None):
+    """filter an iterator of SolveStats solve statistics based on MAD,
+        scale, and error criteria
+
+
+    Parameters
+    ----------
+    solvestats: list[SolveStats]
+      solve statistics to filter by criteria
+    associated_values: list
+      list of values to return based on the same filtering applied
+      to the solve statistics.  Used to filter solver results by
+      the associated statistics.
+    mad_target:  tuple, optional
+      x and y target MAD that will be the starting point for
+      MAD filtering steps.  Default to 0.003 for both axes
+    mad_cutoff: tuple, optional
+      x and y cutoff that will be maximum considered MAD during
+      filtering steps.  Default to (0.005, 0.007)
+    mad_step_size: tuple, optional
+      x and y step size by which the filtering will increase
+      the acceptable MAD threshold.  Default to 0.001 for both axes
+    scalemin_cutoff: tuple, optional
+      minimum x and y scale that will disqualify a solve. Default to 0
+    min_inliers: int, optional
+      minimum number of solves passing filtering criteria to return
+      a result.  In some cases, it may be preferable to return a
+      group including more distorted results with less error that
+      could be impacted by the MAD search strategy. Default 1
+    max_inliers: int or None, optional
+      maximum number of inliers to return when a result is found.
+      Default (None) returns all inliers in current iteration.
+    scaled_error_cutoff: float or None:
+      maximum scaled error (euclidean distance residual in solved tile space)
+      that will be considered acceptable.  Useful in situations where you may
+      want to probe more distorted spaces for acceptable residuals.
+      Default (None) sets no limit.
+
+
+    Returns
+    -------
+    sorted_inliers: list of tuple
+      list of filtered (SolveStats, associated_values) tuples
+      sorted by scaled error or None if no results
+    """
     associated_values = (
         itertools.repeat(None)
         if associated_values is None
@@ -117,6 +181,38 @@ def sweep_parameters(rts, matches, transform_name="affine",
                      regularization_dict=None, matrix_assembly_dict=None,
                      order=2, fullsize=False,
                      processes=1, params_iter=None):
+    """concurrently solves across multiple lambda and transfac parameters as
+        used in affine solves
+
+    Parameters
+    ----------
+    rts: renderapi.resolvedtiles.ResolvedTiles
+        resolvedtiles object containing tiles to consider during assembly
+    matches : list of dict
+        pointmatches in render format
+    transform_name : string
+        string describing model for which to solve (see Schema)
+    transform_apply : list of int
+        additional transforms to apply to pointmatches
+    regularization_dict : dict
+        regularization parameters (see Schema)
+    matrix_assembly_dict : dict
+        matrix assembly parameters (see Schema)
+    order : int
+        order for polynomial transform
+    fullsize : boolean
+        whether to use fullsize matrices
+    processes: int
+        concurrent processes to use during sweep
+    params_iter: list of tuple of float
+        list of (lambda, translaction_factor) tuples to be used as
+        regularization during solves
+
+    Returns
+    -------
+    sweep_results: list of ParameterResult
+        solver results from parameter sweep
+    """
     create_CSR_A_input = (
         rts, matches, transform_name,
         ([] if transform_apply is None else transform_apply),
@@ -147,6 +243,45 @@ def sweep_parameters(rts, matches, transform_name="affine",
 def sweep_parameters_logarithmic(
         *args, lambda_log_range=(-1, 8), num_lambda=15,
         transfac_log_range=(-7, -3), num_transfac=15, **kwargs):
+    """sweep affine regularization parameters across logarithmic lambda values
+
+    Parameters
+    ----------
+    rts: renderapi.resolvedtiles.ResolvedTiles
+        resolvedtiles object containing tiles to consider during assembly
+    matches : list of dict
+        pointmatches in render format
+    transform_name : string
+        string describing model for which to solve (see Schema)
+    transform_apply : list of int
+        additional transforms to apply to pointmatches
+    regularization_dict : dict
+        regularization parameters (see Schema)
+    matrix_assembly_dict : dict
+        matrix assembly parameters (see Schema)
+    order : int
+        order for polynomial transform
+    fullsize : boolean
+        whether to use fullsize matrices
+    processes: int
+        concurrent processes to use during sweep
+    params_iter: list of tuple of float
+        list of (lambda, translaction_factor) tuples to be used as
+        regularization during solves
+    lambda_log_range: tuple of float
+        logarithmic range of lambda values to sweep
+    num_lambda: int
+        number of evenly distributed samples along lambda_log_range
+    transfac_log_range: tuple of float
+        logarithmic range of translation factors to sweep
+    num_transfac: int
+        number of evenly distributed samples along transfac_log_range
+
+    Returns
+    -------
+    sweep_results: list of ParameterResult
+        solver results from parameter sweep
+    """
     lambda_list = numpy.logspace(
         *lambda_log_range, num=num_lambda)
     transfac_list = numpy.logspace(
