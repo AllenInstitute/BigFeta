@@ -1,10 +1,11 @@
-from .utils import AlignerTransformException
 from .affine_model import AlignerAffineModel
-from .similarity_model import AlignerSimilarityModel
 from .polynomial_model import AlignerPolynomial2DTransform
 from .rotation_model import AlignerRotationModel
-from .translation_model import AlignerTranslationModel
+from .similarity_model import AlignerSimilarityModel
 from .thinplatespline_model import AlignerThinPlateSplineTransform
+from .translation_model import AlignerTranslationModel
+from .utils import AlignerTransformException
+
 __all__ = ['AlignerTransform']
 
 

@@ -1,8 +1,10 @@
-import renderapi
-from .utils import AlignerTransformException
 import numpy as np
+import renderapi
 from scipy.sparse import csr_matrix
 from scipy.spatial.distance import cdist
+
+from .utils import AlignerTransformException
+
 __all__ = ['AlignerThinPlateSplineTransform']
 
 

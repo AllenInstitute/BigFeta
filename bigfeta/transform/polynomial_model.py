@@ -1,6 +1,7 @@
-import renderapi
 import numpy as np
+import renderapi
 from scipy.sparse import csr_matrix
+
 __all__ = ['AlignerPolynomial2DTransform']
 
 

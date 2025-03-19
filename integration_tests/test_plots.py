@@ -13,8 +13,9 @@ import numpy as np
 import copy
 
 TEST_PLOTS = os.getenv("BIGFETA_TEST_PLOTS", False)
+TEST_PLOTS = (True if (TEST_PLOTS is True or TEST_PLOTS in ("true", "1", "yes")) else False)
 if not TEST_PLOTS:
-    pytestmark = pytest.mark.skip("Plotting tests are disabled", allow_module_level=True)
+    pytestmark = pytest.mark.skip("Plotting tests are disabled")
 
 FILE_PMS = './integration_tests/test_files/montage_pointmatches.json'
 
