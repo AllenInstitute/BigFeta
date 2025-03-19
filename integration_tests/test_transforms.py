@@ -13,6 +13,8 @@ from bigfeta.transform.thinplatespline_model import \
         AlignerThinPlateSplineTransform
 from bigfeta.transform.utils import AlignerTransformException, aff_matrix
 
+random_seed = None
+rng = np.random.default_rng(random_seed)
 
 def test_aff_matrix():
     a = aff_matrix(0.0)
@@ -40,7 +42,7 @@ def test_aliases():
 def test_transform():
     # must specify something
     with pytest.raises(AlignerTransformException):
-        t = AlignerTransform()
+        _ = AlignerTransform()
 
     # two ways to load affine
     t = AlignerTransform(name='AffineModel')
@@ -103,11 +105,11 @@ def example_match(npts, fac=1):
     match['matches'] = {
             "w": list(np.ones(npts)),
             "p": [
-                list(np.random.rand(npts) * fac),
-                list(np.random.rand(npts) * fac)],
+                list(rng.random(npts) * fac),
+                list(rng.random(npts) * fac)],
             "q": [
-                list(np.random.rand(npts) * fac),
-                list(np.random.rand(npts) * fac)]
+                list(rng.random(npts) * fac),
+                list(rng.random(npts) * fac)]
             }
     return match
 
@@ -116,7 +118,7 @@ def test_affine_model():
     # can't do this
     rt = renderapi.transform.Polynomial2DTransform()
     with pytest.raises(AlignerTransformException):
-        t = AlignerAffineModel(transform=rt)
+        _ = AlignerAffineModel(transform=rt)
 
     # check args
     rt = renderapi.transform.AffineModel()
@@ -177,7 +179,7 @@ def test_affine_model():
     vec = np.tile(vi, ntiles)
     vec = vec.reshape(-1, 1)
     index = 0
-    for i in range(ntiles):
+    for _ in range(ntiles):
         index += t.from_solve_vec(vec[index:, :])
         assert np.all(np.isclose(t.M[0:2, :].flatten(), vi))
 
@@ -207,7 +209,7 @@ def test_similarity_model():
     # can't do this
     rt = renderapi.transform.Polynomial2DTransform()
     with pytest.raises(AlignerTransformException):
-        t = AlignerSimilarityModel(transform=rt)
+        _ = AlignerSimilarityModel(transform=rt)
 
     # check args
     rt = renderapi.transform.SimilarityModel()
@@ -243,7 +245,7 @@ def test_similarity_model():
     vec = np.tile(vi, ntiles)
     vec = vec.reshape(-1, 1)
     index = 0
-    for i in range(ntiles):
+    for _ in range(ntiles):
         index += t.from_solve_vec(vec[index:, :])
         msub = t.M.flatten()[[0, 1, 2, 5]]
         assert np.all(np.isclose(msub, vi))
@@ -298,7 +300,7 @@ def test_polynomial_model():
     # to vec
     for order in range(4):
         n = int((order + 1) * (order + 2) / 2)
-        params = np.random.randn(2, n)
+        params = rng.normal(size=(2, n))
         rt = renderapi.transform.Polynomial2DTransform(params=params)
         t = AlignerTransform(name='Polynomial2DTransform', transform=rt)
         v = t.to_solve_vec()
@@ -307,14 +309,14 @@ def test_polynomial_model():
     # from vec
     for order in range(4):
         n = int((order + 1) * (order + 2) / 2)
-        v0 = np.random.randn(n, 2)
+        v0 = rng.normal(size=(n, 2))
         rt0 = renderapi.transform.Polynomial2DTransform(
                 params=np.zeros((2, n)))
         t = AlignerTransform(name='Polynomial2DTransform', transform=rt0)
         assert t.order == order
         vec = np.concatenate((v0, v0, v0, v0))
         index = 0
-        for i in range(4):
+        for _ in range(4):
             index += t.from_solve_vec(vec[index:, :])
             assert np.all(np.isclose(t.params.transpose(), v0))
 
@@ -340,7 +342,7 @@ def test_polynomial_model():
         rt0 = renderapi.transform.Polynomial2DTransform(params=vec)
         t = AlignerTransform(name='Polynomial2DTransform', transform=rt0)
 
-        pf = np.random.randn(order + 1)
+        pf = rng.normal(size=(order + 1))
         rdict = {
                 "default_lambda": 1.0,
                 "translation_factor": 0.1,
@@ -348,7 +350,7 @@ def test_polynomial_model():
         r = t.regularization(rdict)
         ni = 0
         for i in range(order + 1):
-            for j in range(i + 1):
+            for _ in range(i + 1):
                 assert np.all(r[ni::n] == pf[i])
                 ni += 1
 
@@ -357,7 +359,7 @@ def test_rotation_model():
     # can't do this
     rt = renderapi.transform.Polynomial2DTransform()
     with pytest.raises(AlignerTransformException):
-        t = AlignerRotationModel(transform=rt)
+        _ = AlignerRotationModel(transform=rt)
 
     # check args
     rt = renderapi.transform.AffineModel()
@@ -399,7 +401,7 @@ def test_rotation_model():
 
     # from vec
     ntiles = 6
-    vec = np.random.randn(ntiles)
+    vec = rng.normal(size=ntiles)
     vec = vec.reshape(-1, 1)
     index = 0
     for i in range(ntiles):
@@ -421,7 +423,7 @@ def test_translation_model():
     # can't do this
     rt = renderapi.transform.Polynomial2DTransform()
     with pytest.raises(AlignerTransformException):
-        t = AlignerTranslationModel(transform=rt)
+        _ = AlignerTranslationModel(transform=rt)
 
     # check args
     rt = renderapi.transform.AffineModel()
@@ -454,7 +456,7 @@ def test_translation_model():
 
     # from vec
     ntiles = 6
-    vec = np.random.randn(ntiles * 2)
+    vec = rng.normal(size=ntiles * 2)
     vec = vec.reshape(-1, 2)
     index = 0
     for i in range(ntiles):
@@ -477,17 +479,17 @@ def test_thinplate_model(computeAffine):
     # can't do this
     rt = renderapi.transform.Polynomial2DTransform()
     with pytest.raises(AlignerTransformException):
-        t = AlignerThinPlateSplineTransform(transform=rt)
+        _ = AlignerThinPlateSplineTransform(transform=rt)
 
     # or this
     with pytest.raises(AlignerTransformException):
-        t = AlignerTransform(name='ThinPlateSplineTransform')
+        _ = AlignerTransform(name='ThinPlateSplineTransform')
 
     hw = 5000
     x = y = np.linspace(0, hw, 4)
     xt, yt = np.meshgrid(x, y)
     src = np.vstack((xt.flatten(), yt.flatten())).transpose()
-    dst = src + np.random.randn(src.shape[0], src.shape[1]) * 50
+    dst = src + rng.normal(size=(src.shape[0], src.shape[1])) * 50
 
     # check args
     rt = renderapi.transform.ThinPlateSplineTransform()
@@ -530,7 +532,7 @@ def test_thinplate_model(computeAffine):
     index = 0
     orig = renderapi.transform.ThinPlateSplineTransform()
     orig.estimate(src, dst, computeAffine=computeAffine)
-    for i in range(ntiles):
+    for _ in range(ntiles):
         index += t.from_solve_vec(vec[index:, :])
         assert np.all(np.isclose(orig.dMtxDat, t.dMtxDat))
         if computeAffine:
