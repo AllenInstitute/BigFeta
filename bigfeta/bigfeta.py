@@ -43,7 +43,6 @@ def calculate_processing_chunk(fargs):
     """
     t0 = time.time()
     # set up for calling using multiprocessing pool
-    [pair, args, tspecs, tforms, col_ind, ncol] = fargs[0]
     chunks = []
     dbconnection = utils.make_dbconnection(args['pointmatch'])
     for farg in fargs:
