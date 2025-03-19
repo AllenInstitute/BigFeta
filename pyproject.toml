@@ -1,7 +1,17 @@
 [project]
 name = "bigfeta"
+description = "global alignment of features between images"
+readme = "README.rst"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Dan Kapner"},
+  {name = "Russel Torres"}
+]
+maintainers = [
+  {name = "Russel Torres"}
+]
 requires-python = ">3.8,<3.12"
-dynamic = ["version"] 
+dynamic = ["version"]
 dependencies = [
     "render-python>=2.2.1",
     "marshmallow<3.0",
@@ -17,6 +27,9 @@ dependencies = [
     "pathos",
     'futures; python_version == "2.7"',
 ]
+
+[project.urls]
+Repository = "https://github.com/AllenInstitute/BigFeta.git"
 
 [project.optional-dependencies]
 test = [
