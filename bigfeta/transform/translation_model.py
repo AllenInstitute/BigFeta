@@ -1,7 +1,9 @@
 import renderapi
-from .utils import AlignerTransformException
 import numpy as np
 from scipy.sparse import csr_matrix
+
+from .utils import AlignerTransformException
+
 __all__ = ['AlignerTranslationModel']
 
 

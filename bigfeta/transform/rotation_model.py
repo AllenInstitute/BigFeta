@@ -1,8 +1,10 @@
-import renderapi
 import numpy as np
-from scipy.sparse import csr_matrix
+import renderapi
 from scipy.linalg import block_diag
+from scipy.sparse import csr_matrix
+
 from .utils import aff_matrix, aff_matrices, AlignerTransformException
+
 __all__ = ['AlignerRotationModel']
 
 
