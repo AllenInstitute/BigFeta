@@ -1,5 +1,8 @@
 import pytest
+
+import numpy as np
 import renderapi
+
 from bigfeta.transform.transform import AlignerTransform
 from bigfeta.transform.affine_model import AlignerAffineModel
 from bigfeta.transform.similarity_model import AlignerSimilarityModel
@@ -9,7 +12,6 @@ from bigfeta.transform.polynomial_model import AlignerPolynomial2DTransform
 from bigfeta.transform.thinplatespline_model import \
         AlignerThinPlateSplineTransform
 from bigfeta.transform.utils import AlignerTransformException, aff_matrix
-import numpy as np
 
 
 def test_aff_matrix():
@@ -18,8 +20,8 @@ def test_aff_matrix():
     a = aff_matrix(0.0, offs=[0.0, 0.0])
     assert np.all(np.isclose(a, np.eye(3)))
     a = aff_matrix(0.0, offs=[1.0, 2.0])
-    assert a[0, 2] == 1.0
-    assert a[1, 2] == 2.0
+    assert np.isclose(a[0, 2], 1.0)
+    assert np.isclose(a[1, 2], 2.0)
 
 
 def test_aliases():
@@ -193,12 +195,12 @@ def test_affine_model():
             "translation_factor": 0.1}
     t = AlignerTransform(name='AffineModel', transform=rt, fullsize=True)
     r = t.regularization(rdict)
-    assert np.all(r[[0, 1, 3, 4]] == 1.0)
-    assert np.all(r[[2, 5]] == 0.1)
+    assert np.allclose(r[[0, 1, 3, 4]], 1.0)
+    assert np.allclose(r[[2, 5]], 0.1)
     t = AlignerTransform(name='AffineModel', transform=rt, fullsize=False)
     r = t.regularization(rdict)
-    assert np.all(r[[0, 1]] == 1.0)
-    assert np.all(r[[2]] == 0.1)
+    assert np.allclose(r[[0, 1]], 1.0)
+    assert np.allclose(r[[2]], 0.1)
 
 
 def test_similarity_model():
@@ -252,8 +254,8 @@ def test_similarity_model():
             "translation_factor": 0.1}
     t = AlignerTransform(name='SimilarityModel')
     r = t.regularization(rdict)
-    assert np.all(r[[0, 1]] == 1.0)
-    assert np.all(r[[2, 3]] == 0.1)
+    assert np.allclose(r[[0, 1]], 1.0)
+    assert np.allclose(r[[2, 3]], 0.1)
 
 
 def test_polynomial_model():
