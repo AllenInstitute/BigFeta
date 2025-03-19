@@ -895,12 +895,41 @@ def transform_match(match, ptspec, qtspec, apply_list, tforms):
     return match
 
 
-# TODO fast copy resolvedtiles
 def copy_resolvedtiles(resolvedtiles):
+    """deep copy resolvedtiles.  Currently a placeholder for a faster method than copy.deepcopy
+
+    Parameters
+    ----------
+    resolvedtiles: renderapi.resolvedtiles.ResolvedTiles
+        resolved tiles to copy
+
+    Returns
+    -------
+    copied_resolvedtiles: renderapi.resolvedtiles.ResolvedTiles
+        deep copy of input resolved tiles
+    """
     return copy.deepcopy(resolvedtiles)
 
 
 def tilespecs_regularization_from_reg_d(tilespecs, reg_d):
+    """create new regularization diagonal based on the final
+        AlignerTransform of tilespecs and a provided
+        regularization dictionary
+
+    Parameters
+    ----------
+    tilespecs: list of renderapi.tilespec.TileSpec
+        tilespecs with final transform being AlignerTransform in
+        order of array regularization
+    reg_d: dict
+        bigfeta-conforming regularization dict that will be used
+        to assemble a new regularization matrix
+
+    Returns
+    -------
+    diags: scipy.sparse.csr_array
+        sparse matrix representation of new regularization
+    """
     return sparse.diags(
         [np.concatenate(
             [ts.tforms[-1].regularization(reg_d) for ts in tilespecs])],
@@ -908,6 +937,20 @@ def tilespecs_regularization_from_reg_d(tilespecs, reg_d):
 
 
 def matches_to_match_id_tree(matches):
+    """create a tree structure based on the ids and group ids
+        of a list of render pointmatch dictionaries
+
+    Parameters
+    ----------
+    matches: list of dict
+        matches in the render pointmatch format
+
+
+    Returns
+    -------
+    group_id_tree: dict
+        tree representation of matches like {(pGroupId, qGroupId): {(pId, qId): match}}
+    """
     group_id_tree = {}
     for m in matches:
         group_pair = (m["pGroupId"], m["qGroupId"])
@@ -920,6 +963,20 @@ def matches_to_match_id_tree(matches):
 
 
 def tilespecs_to_z_section_tree(tilespecs):
+    """create a tree structure based on the z, sectionIds, and tileIds
+        of a list of tilespecs
+
+    Parameters
+    ----------
+    tilespecs: list of renderapi.tilespecs.TileSpec
+        tilespecs to represent in the tree format
+
+    Returns
+    -------
+    z_section_tree: dict
+        tree format of tilespecs represented
+        like {(z, sectionId): {tileId: tilespec}}
+    """
     z_section_tree = {}
     for ts in tilespecs:
         try:
