@@ -905,3 +905,25 @@ def tilespecs_regularization_from_reg_d(tilespecs, reg_d):
         [np.concatenate(
             [ts.tforms[-1].regularization(reg_d) for ts in tilespecs])],
         [0], format="csr")
+
+
+def matches_to_match_id_tree(matches):
+    group_id_tree = {}
+    for m in matches:
+        group_pair = (m["pGroupId"], m["qGroupId"])
+        id_pair = (m["pId"], m["qId"])
+        try:
+            group_id_tree[group_pair][id_pair] = m
+        except KeyError:
+            group_id_tree[group_pair] = {id_pair: m}
+    return group_id_tree
+
+
+def tilespecs_to_z_section_tree(tilespecs):
+    z_section_tree = {}
+    for ts in tilespecs:
+        try:
+            z_section_tree[(ts.z, ts.layout.sectionId)][ts.tileId] = ts
+        except KeyError:
+            z_section_tree[(ts.z, ts.layout.sectionId)] = {ts.tileId: ts}
+    return z_section_tree

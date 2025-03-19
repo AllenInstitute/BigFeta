@@ -250,7 +250,7 @@ def create_CSR_A_fromprepared(resolvedtiles, matches, regularization_dict,
             [0],
             [t.tforms[-1].DOF_per_tile
              for t in draft_resolvedtiles.tilespecs])))
-    ncol = col_ind.max()  # TODO is this correct?
+    ncol = col_ind.max()
 
     tId_to_col_idx = {
         ts.tileId: col_ind[i]
@@ -258,24 +258,13 @@ def create_CSR_A_fromprepared(resolvedtiles, matches, regularization_dict,
     tId_to_tspec = {
         ts.tileId: ts for ts in draft_resolvedtiles.tilespecs}
 
-    group_id_tree = {}
-    for m in matches:
-        group_pair = (m["pGroupId"], m["qGroupId"])
-        id_pair = (m["pId"], m["qId"])
-        try:
-            group_id_tree[group_pair][id_pair] = m
-        except KeyError:
-            group_id_tree[group_pair] = {id_pair: m}
+    # map like {(pGroupId, qGroupId): {(pId, qId): match}}
+    group_id_tree = utils.matches_to_match_id_tree(matches)
 
-    z_section_tree = {}
-    for ts in draft_resolvedtiles.tilespecs:
-        try:
-            z_section_tree[(ts.z, ts.layout.sectionId)][ts.tileId] = ts
-        except KeyError:
-            z_section_tree[(ts.z, ts.layout.sectionId)] = {ts.tileId: ts}
+    # map like {{z, sectionId}: {tileId: tilespec}}
+    z_section_tree = utils.tilespecs_to_z_section_tree(draft_resolvedtiles.tilespecs)
 
-    # TODO how useful is it to chunk this -- I have the feeling most of the
-    #   time is spent in calls to the REST api
+    # NOTE possible that chunking is not required structurally or for performance
     chunks = []
 
     for pair in pairs:
