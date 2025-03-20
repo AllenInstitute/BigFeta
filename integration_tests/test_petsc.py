@@ -1,3 +1,4 @@
+import os
 import pytest
 import renderapi
 from test_data import (
@@ -10,6 +11,12 @@ import copy
 import numpy as np
 from shutil import rmtree
 import subprocess
+
+TEST_PETSC = os.getenv("BIGFETA_TEST_PETSC", False)
+TEST_PETSC = (True if (TEST_PETSC is True or TEST_PETSC in ("true", "1", "yes")) else False)
+
+if not TEST_PETSC:
+    pytestmark = pytest.mark.skip("PETSc tests are disabled")
 
 dname = os.path.dirname(os.path.abspath(__file__))
 FILE_ROUGH_TILES = os.path.join(

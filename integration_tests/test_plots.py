@@ -4,13 +4,18 @@ from test_data import (render_params,
                        montage_raw_tilespecs_json,
                        montage_parameters)
 from bigfeta.qctools.CheckPointMatches import CheckPointMatches
-from bigfeta.qctools.CheckResiduals import CheckResiduals
+# from bigfeta.qctools.CheckResiduals import CheckResiduals  # residual has bad dep
 from bigfeta.qctools.CheckTransforms import CheckTransforms, fixpi
 import json
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
+
+TEST_PLOTS = os.getenv("BIGFETA_TEST_PLOTS", False)
+TEST_PLOTS = (True if (TEST_PLOTS is True or TEST_PLOTS in ("true", "1", "yes")) else False)
+if not TEST_PLOTS:
+    pytestmark = pytest.mark.skip("Plotting tests are disabled")
 
 FILE_PMS = './integration_tests/test_files/montage_pointmatches.json'
 

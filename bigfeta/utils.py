@@ -1,22 +1,28 @@
-from pymongo import MongoClient
-import numpy as np
-import renderapi
-from renderapi.external.processpools import pool_pathos
+import collections
+import copy
+from functools import partial
+import itertools
+import json
 import logging
+import os
+import subprocess
+import sys
 import time
 import warnings
-import os
-import sys
-import json
-from functools import partial
+
+import h5py
+import numpy as np
+import requests
 import scipy.sparse as sparse
+
+from pymongo import MongoClient
+
+import renderapi
+from renderapi.external.processpools import pool_pathos
+
 from .transform.transform import AlignerTransform, AlignerRotationModel
 from . import jsongz
-import collections
-import itertools
-import subprocess
-import requests
-import h5py
+
 
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
@@ -887,3 +893,94 @@ def transform_match(match, ptspec, qtspec, apply_list, tforms):
                 raise
             match['matches'][pq] = dst.transpose().tolist()
     return match
+
+
+def copy_resolvedtiles(resolvedtiles):
+    """deep copy resolvedtiles.  Currently a placeholder for a faster method than copy.deepcopy
+
+    Parameters
+    ----------
+    resolvedtiles: renderapi.resolvedtiles.ResolvedTiles
+        resolved tiles to copy
+
+    Returns
+    -------
+    copied_resolvedtiles: renderapi.resolvedtiles.ResolvedTiles
+        deep copy of input resolved tiles
+    """
+    return copy.deepcopy(resolvedtiles)
+
+
+def tilespecs_regularization_from_reg_d(tilespecs, reg_d):
+    """create new regularization diagonal based on the final
+        AlignerTransform of tilespecs and a provided
+        regularization dictionary
+
+    Parameters
+    ----------
+    tilespecs: list of renderapi.tilespec.TileSpec
+        tilespecs with final transform being AlignerTransform in
+        order of array regularization
+    reg_d: dict
+        bigfeta-conforming regularization dict that will be used
+        to assemble a new regularization matrix
+
+    Returns
+    -------
+    diags: scipy.sparse.csr_array
+        sparse matrix representation of new regularization
+    """
+    return sparse.diags(
+        [np.concatenate(
+            [ts.tforms[-1].regularization(reg_d) for ts in tilespecs])],
+        [0], format="csr")
+
+
+def matches_to_match_id_tree(matches):
+    """create a tree structure based on the ids and group ids
+        of a list of render pointmatch dictionaries
+
+    Parameters
+    ----------
+    matches: list of dict
+        matches in the render pointmatch format
+
+
+    Returns
+    -------
+    group_id_tree: dict
+        tree representation of matches like {(pGroupId, qGroupId): {(pId, qId): match}}
+    """
+    group_id_tree = {}
+    for m in matches:
+        group_pair = (m["pGroupId"], m["qGroupId"])
+        id_pair = (m["pId"], m["qId"])
+        try:
+            group_id_tree[group_pair][id_pair] = m
+        except KeyError:
+            group_id_tree[group_pair] = {id_pair: m}
+    return group_id_tree
+
+
+def tilespecs_to_z_section_tree(tilespecs):
+    """create a tree structure based on the z, sectionIds, and tileIds
+        of a list of tilespecs
+
+    Parameters
+    ----------
+    tilespecs: list of renderapi.tilespecs.TileSpec
+        tilespecs to represent in the tree format
+
+    Returns
+    -------
+    z_section_tree: dict
+        tree format of tilespecs represented
+        like {(z, sectionId): {tileId: tilespec}}
+    """
+    z_section_tree = {}
+    for ts in tilespecs:
+        try:
+            z_section_tree[(ts.z, ts.layout.sectionId)][ts.tileId] = ts
+        except KeyError:
+            z_section_tree[(ts.z, ts.layout.sectionId)] = {ts.tileId: ts}
+    return z_section_tree

@@ -1,8 +1,6 @@
 from . import solve_scipy
 from . import solve_petsc
 
-# import bigfeta.solve.solve_petsc
-
 # uses petsc if available.  Can set default solve by modifying this.
 default_solve = (solve_petsc.solve
                  if solve_petsc.HAS_PETSC
