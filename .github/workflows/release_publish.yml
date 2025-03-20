@@ -19,7 +19,7 @@ jobs:
           cache: false
           run-install: false
 
-      - name: Builkd pixi
+      - name: Build with pixi env
         run: pixi run pypi-build
 
       - name: Publish to Pypi
