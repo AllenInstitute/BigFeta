@@ -17,6 +17,7 @@ jobs:
         with:
           pixi-version: v0.41.4
           cache: false
+          run-install: false
 
       - name: Builkd pixi
         run: pixi run build
