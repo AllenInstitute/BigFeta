@@ -20,7 +20,7 @@ jobs:
           run-install: false
 
       - name: Builkd pixi
-        run: pixi run build
+        run: pixi run pypi-build
 
       - name: Publish to Pypi
         uses: pypa/gh-action-pypi-publish@release/v1
