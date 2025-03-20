@@ -3,7 +3,7 @@ marshmallow<3.0
 argschema<2.0
 numpy
 scipy
-pymongo==3.11.1
+pymongo==4.6.3
 h5py
 matplotlib
 mpl_scatter_density
